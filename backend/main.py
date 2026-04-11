@@ -1,12 +1,20 @@
 # main.py
 import json
+import logging
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 from models import BuildingRecord, ROIRequest, ROIResponse, BriefRequest, BriefResponse
 from roi_engine import calc_scenario
+from brief_generator import generate_brief
+
+load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="RainUSE Nexus API")
 
@@ -53,5 +61,14 @@ def calculate_roi(req: ROIRequest):
 
 @app.post("/brief", response_model=BriefResponse)
 def generate_investment_brief(req: BriefRequest):
-    # Placeholder — implemented in Step 7 after brief_generator.py is wired up
-    raise HTTPException(status_code=501, detail="Brief generation not yet implemented")
+    building = get_building(req.building_id)
+    roi_data = calc_scenario(building, "base")
+    roi = ROIResponse(building_id=req.building_id, scenario="base", **roi_data)
+    try:
+        return generate_brief(building, roi)
+    except ValidationError as e:
+        logger.error("BriefResponse validation failed for %s: %s", req.building_id, str(e))
+        raise HTTPException(status_code=422, detail=f"Brief schema validation failed: {str(e)}")
+    except Exception as e:
+        logger.error("Brief generation failed for %s: %s", req.building_id, str(e))
+        raise HTTPException(status_code=500, detail=f"Brief generation failed: {str(e)}")
