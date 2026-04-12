@@ -28,36 +28,36 @@ const SEGMENTS: Segment[] = [
     label: "Water Savings",
     sub: "Potable water avoided",
     color: "bg-blue-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-    textColor: "text-blue-400",
+    bg: "bg-blue-50/80",
+    border: "border-blue-200/60",
+    textColor: "text-blue-700",
   },
   {
     key: "sewerSavingsUsd",
     label: "Sewer Savings",
     sub: "70% discharge offset",
     color: "bg-cyan-500",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/30",
-    textColor: "text-cyan-400",
+    bg: "bg-cyan-50/80",
+    border: "border-cyan-200/60",
+    textColor: "text-cyan-700",
   },
   {
     key: "stormwaterUsd",
     label: "Stormwater Avoidance",
     sub: "Active fee offset",
     color: "bg-teal-500",
-    bg: "bg-teal-500/10",
-    border: "border-teal-500/30",
-    textColor: "text-teal-400",
+    bg: "bg-teal-50/80",
+    border: "border-teal-200/60",
+    textColor: "text-teal-700",
   },
   {
     key: "incentiveAmortUsd",
     label: "Incentive (Amortized)",
     sub: "$25K over 10 yrs",
     color: "bg-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    textColor: "text-emerald-400",
+    bg: "bg-emerald-50/80",
+    border: "border-emerald-200/60",
+    textColor: "text-emerald-700",
   },
 ];
 
@@ -71,40 +71,39 @@ export default function SavingsBreakdown({ data }: SavingsBreakdownProps) {
   const total = SEGMENTS.reduce((acc, s) => acc + data[s.key], 0);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-4">
+    <div className="bg-white/80 backdrop-blur-sm border border-slate-200/70 rounded-2xl p-4 flex flex-col gap-4 shadow-sm">
       <div>
-        <h3 className="text-xs font-bold text-white">Annual Savings Composition</h3>
-        <p className="text-[10px] text-gray-500 mt-0.5">Breakdown by savings category</p>
+        <h3 className="text-sm font-bold text-slate-900">Annual Savings Composition</h3>
+        <p className="text-xs text-slate-500 mt-0.5">Breakdown by savings category</p>
       </div>
 
-      {/* ── Total hero ──────────────────────────────────── */}
+      {/* ── Total hero ──────────────────────���───────────── */}
       <div className="flex items-end justify-between">
         <div>
-          <div className="text-[9px] font-semibold uppercase tracking-widest text-gray-500 mb-0.5">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
             Total Annual Savings
           </div>
-          <div className="text-3xl font-black text-emerald-400 tabular-nums leading-none">
+          <div className="text-4xl font-black text-emerald-600 tabular-nums leading-none">
             {fmtUsd(total)}
           </div>
-          <div className="text-[10px] text-gray-600 mt-1">per year</div>
+          <div className="text-xs text-slate-500 mt-1">per year</div>
         </div>
-        {/* Simple donut ring */}
         <DonutRing data={data} total={total} />
       </div>
 
       {/* ── Stacked bar ─────────────────────────────────── */}
       <div>
-        <div className="text-[9px] font-semibold uppercase tracking-widest text-gray-600 mb-2">
+        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
           Composition
         </div>
-        <div className="flex h-4 rounded-full overflow-hidden gap-px bg-gray-800">
+        <div className="flex h-3 rounded-full overflow-hidden gap-px bg-slate-100">
           {SEGMENTS.map((s) => {
             const pct = total > 0 ? (data[s.key] / total) * 100 : 0;
             if (pct < 1) return null;
             return (
               <div
                 key={s.key}
-                className={cn("h-full transition-all", s.color)}
+                className={cn("h-full transition-all duration-500", s.color)}
                 style={{ width: `${pct}%` }}
                 title={`${s.label}: ${fmtUsd(data[s.key])}`}
               />
@@ -114,26 +113,26 @@ export default function SavingsBreakdown({ data }: SavingsBreakdownProps) {
       </div>
 
       {/* ── Segment breakdown list ──────────────────────── */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {SEGMENTS.map((s) => {
           const pct = (total > 0 ? (data[s.key] / total) * 100 : 0).toFixed(0);
           return (
             <div
               key={s.key}
               className={cn(
-                "flex items-center justify-between rounded-lg px-3 py-2 border",
+                "flex items-center justify-between rounded-xl px-3 py-2 border backdrop-blur-sm transition-all duration-200 hover:shadow-sm",
                 s.bg, s.border
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className={cn("w-2 h-2 rounded-full shrink-0", s.color)} />
                 <div className="min-w-0">
-                  <div className={cn("text-xs font-semibold", s.textColor)}>{s.label}</div>
-                  <div className="text-[10px] text-gray-600">{s.sub}</div>
+                  <div className={cn("text-xs font-bold", s.textColor)}>{s.label}</div>
+                  <div className="text-[11px] text-slate-500">{s.sub}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
-                <span className="text-[10px] text-gray-600">{pct}%</span>
+                <span className="text-xs text-slate-400">{pct}%</span>
                 <span className={cn("text-sm font-bold tabular-nums", s.textColor)}>
                   {fmtUsd(data[s.key])}
                 </span>
@@ -143,9 +142,9 @@ export default function SavingsBreakdown({ data }: SavingsBreakdownProps) {
         })}
       </div>
 
-      {/* ── Footer note ─────────────────────────────────── */}
-      <div className="pt-2 border-t border-gray-800">
-        <p className="text-[10px] text-gray-600 text-center">
+      {/* ── Footer note ────────────────────────────���────── */}
+      <div className="pt-2 border-t border-slate-100">
+        <p className="text-[11px] text-slate-400 text-center">
           Water + sewer + stormwater avoidance + incentive amortization
         </p>
       </div>
@@ -153,7 +152,7 @@ export default function SavingsBreakdown({ data }: SavingsBreakdownProps) {
   );
 }
 
-// ─── Donut ring (pure SVG, no deps) ──────────────────────────────────────────
+// ─── Donut ring (pure SVG, no deps) ───────────────────────────────��──────────
 
 const DONUT_COLORS = ["#3b82f6", "#06b6d4", "#14b8a6", "#10b981"];
 
@@ -168,9 +167,7 @@ function DonutRing({ data, total }: { data: SavingsData; total: number }) {
 
   return (
     <svg width="72" height="72" viewBox="0 0 72 72" className="shrink-0">
-      {/* Background ring */}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1f2937" strokeWidth="8" />
-      {/* Segments */}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f1f5f9" strokeWidth="8" />
       {total > 0 && values.map((v, i) => {
         const pct = v / total;
         const dash = circumference * pct;
@@ -192,11 +189,10 @@ function DonutRing({ data, total }: { data: SavingsData; total: number }) {
           />
         );
       })}
-      {/* Center label */}
-      <text x={cx} y={cy - 4} textAnchor="middle" fill="#9ca3af" fontSize="7" fontFamily="monospace">
+      <text x={cx} y={cy - 4} textAnchor="middle" fill="#94a3b8" fontSize="8" fontFamily="monospace">
         /yr
       </text>
-      <text x={cx} y={cy + 7} textAnchor="middle" fill="#10b981" fontSize="9" fontFamily="monospace" fontWeight="bold">
+      <text x={cx} y={cy + 7} textAnchor="middle" fill="#10b981" fontSize="10" fontFamily="monospace" fontWeight="bold">
         {((total / 1000)).toFixed(0)}K
       </text>
     </svg>

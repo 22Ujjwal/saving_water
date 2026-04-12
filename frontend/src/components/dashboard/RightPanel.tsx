@@ -30,12 +30,17 @@ type RightPanelProps = {
 export default function RightPanel(props: RightPanelProps) {
   const { selection, setSelection } = props;
 
+  const panelStyle = { background: "rgba(255,255,255,0.04)", backdropFilter: "blur(24px)" };
+
   if (selection.mapMode === "national") {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-6 bg-slate-950">
-        <div className="text-slate-500 text-3xl mb-3">↗</div>
-        <p className="text-sm font-semibold text-slate-100 mb-1">Click any state to begin</p>
-        <p className="text-xs text-slate-400 leading-relaxed">
+      <div className="h-full flex flex-col items-center justify-center text-center px-6" style={panelStyle}>
+        <div className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center mb-5 text-2xl"
+          style={{ background: "rgba(255,255,255,0.06)" }}>
+          ↗
+        </div>
+        <p className="text-sm font-semibold text-slate-200 mb-2">Click any state to begin</p>
+        <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
           States are scored by market readiness. Select one to view metrics and top metros.
         </p>
       </div>
@@ -43,16 +48,16 @@ export default function RightPanel(props: RightPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-dark" style={panelStyle}>
       {selection.mapMode === "state" && (
-        <div className="p-4 space-y-3">
+        <div className="p-5 space-y-4">
           <StateSummaryPanel selection={selection} stateScores={props.stateScores} />
           <MetroSummaryPanel selection={selection} setSelection={setSelection} stateScores={props.stateScores} />
         </div>
       )}
 
       {selection.mapMode === "metro" && (
-        <div className="p-4 h-full flex flex-col">
+        <div className="p-5 h-full flex flex-col">
           <BuildingListPanel
             selection={selection}
             setSelection={setSelection}
@@ -62,7 +67,7 @@ export default function RightPanel(props: RightPanelProps) {
       )}
 
       {selection.mapMode === "building" && (
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full">
           <BuildingProfilePanel
             selection={selection}
             filteredBuildings={props.filteredBuildings}

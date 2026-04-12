@@ -21,7 +21,6 @@ function fmtGal(n: number): string {
   return `${n.toLocaleString()} gal/yr`;
 }
 
-/** Parse an AI-generated assumptions string into a bullet list */
 function parseAssumptions(text: string): string[] {
   const byLine = text
     .split(/\n+/)
@@ -143,19 +142,19 @@ function toReportData(
   };
 }
 
-// ─── Loading / error states ───────────────────────────────────────────────────
+// ─── Loading / error states ─────────────────────────────────────────────────��─
 
 function LeftPanelSkeleton() {
   return (
-    <div className="flex flex-col h-full bg-gray-900 animate-pulse">
-      <div className="flex-1 bg-gray-800" />
-      <div className="border-t border-gray-800 px-5 py-4 space-y-4">
-        <div className="h-2 w-24 bg-gray-800 rounded" />
+    <div className="flex flex-col h-full bg-slate-100/50 animate-pulse border-r border-slate-200">
+      <div className="flex-1 bg-slate-200/50" />
+      <div className="border-t border-slate-200 px-6 py-6 space-y-4">
+        <div className="h-2.5 w-24 bg-slate-200 rounded" />
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-1.5">
-              <div className="h-2 w-16 bg-gray-800 rounded" />
-              <div className="h-5 w-12 bg-gray-700 rounded" />
+            <div key={i} className="space-y-2">
+              <div className="h-2 w-16 bg-slate-200 rounded" />
+              <div className="h-6 w-12 bg-slate-200 rounded" />
             </div>
           ))}
         </div>
@@ -166,36 +165,35 @@ function LeftPanelSkeleton() {
 
 function LeftPanelError({ message }: { message: string }) {
   return (
-    <div className="flex flex-col h-full bg-gray-900 items-center justify-center p-6">
-      <svg className="w-8 h-8 text-rose-500 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <div className="flex flex-col h-full bg-white items-center justify-center p-6 border-r border-slate-200">
+      <svg className="w-8 h-8 text-red-400 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" strokeLinecap="round" />
       </svg>
-      <p className="text-xs text-rose-400 text-center leading-relaxed">{message}</p>
+      <p className="text-sm text-slate-500 text-center leading-relaxed">{message}</p>
     </div>
   );
 }
 
 function BriefLoadingState() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8">
+    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8 bg-slate-50/50">
       {/* Animated ring */}
       <div className="relative w-16 h-16 mb-6">
         <svg className="w-16 h-16 animate-spin" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="28" stroke="#1f2937" strokeWidth="4" />
-          <path d="M32 4 a28 28 0 0 1 28 28" stroke="#14b8a6" strokeWidth="4" strokeLinecap="round" />
+          <circle cx="32" cy="32" r="28" stroke="#e2e8f0" strokeWidth="4" />
+          <path d="M32 4 a28 28 0 0 1 28 28" stroke="#2563eb" strokeWidth="4" strokeLinecap="round" />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
         </div>
       </div>
 
-      <h2 className="text-sm font-bold text-slate-700 mb-1">Analyzing building data…</h2>
-      <p className="text-xs text-slate-400 text-center max-w-xs leading-relaxed mb-6">
+      <h2 className="text-sm font-semibold text-slate-800 mb-2">Analyzing building data…</h2>
+      <p className="text-xs text-slate-500 text-center max-w-xs leading-relaxed mb-6">
         The RainUSE Nexus AI engine is generating your investment brief.
         This typically takes 10–20 seconds.
       </p>
 
-      {/* Progress hints */}
       <div className="space-y-2 w-full max-w-xs">
         {[
           "Retrieving satellite CV signals",
@@ -223,17 +221,17 @@ function RightPanelError({ message, onRetry }: { message: string; onRetry: () =>
     message.toLowerCase().includes("high demand");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8">
-      <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 max-w-md w-full">
+    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8 bg-slate-50/50">
+      <div className="bg-white border border-red-200 rounded-2xl p-6 max-w-md w-full shadow-sm">
         <div className="flex items-start gap-3 mb-4">
-          <svg className="w-5 h-5 text-rose-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-5 h-5 text-red-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" strokeLinecap="round" />
           </svg>
           <div>
-            <p className="text-sm font-semibold text-rose-800 mb-1">
+            <p className="text-sm font-semibold text-slate-900 mb-1">
               {isThrottled ? "AI model temporarily busy" : "Unable to generate brief"}
             </p>
-            <p className="text-xs text-rose-600 leading-relaxed">
+            <p className="text-sm text-slate-500 leading-relaxed">
               {isThrottled
                 ? "The Gemini AI model is experiencing high demand right now. This is temporary — click \"Try again\" in a few seconds."
                 : message}
@@ -242,7 +240,7 @@ function RightPanelError({ message, onRetry }: { message: string; onRetry: () =>
         </div>
         <button
           onClick={onRetry}
-          className="w-full py-2 rounded-lg bg-rose-100 hover:bg-rose-200 border border-rose-300 text-sm font-semibold text-rose-700 transition-colors"
+          className="w-full py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-sm font-semibold text-red-700 transition-all duration-200"
         >
           Try again
         </button>
@@ -270,14 +268,12 @@ export default function BriefPage({
   useEffect(() => {
     let cancelled = false;
 
-    // Reset state on each fetch cycle
     setBuilding(null);
     setRoi(null);
     setBrief(null);
     setBuildingError(null);
     setBriefError(null);
 
-    // Fast path: building metadata + ROI numbers (~200ms each)
     Promise.all([fetchBuilding(buildingId), fetchROI(buildingId, "base")])
       .then(([bld, r]) => {
         if (!cancelled) { setBuilding(bld); setRoi(r); }
@@ -287,7 +283,6 @@ export default function BriefPage({
           setBuildingError(e instanceof Error ? e.message : "Failed to load building data");
       });
 
-    // Slow path: AI brief generation (10–20s)
     fetchBrief(buildingId)
       .then((b) => { if (!cancelled) setBrief(b); })
       .catch((e: unknown) => {
@@ -298,10 +293,8 @@ export default function BriefPage({
     return () => { cancelled = true; };
   }, [buildingId, retryKey]);
 
-  // Derive display data
   const reportData = brief && roi && building ? toReportData(brief, building, roi) : null;
 
-  // Header renders immediately with a fallback until building loads
   const headerBuilding = building ?? {
     address: buildingId,
     metro: "—", state: "—", building_type: "—",
@@ -310,9 +303,9 @@ export default function BriefPage({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-950 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 overflow-hidden">
 
-      {/* ── Header — renders immediately ──────────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────────── */}
       <BriefHeader
         address={headerBuilding.address}
         metro={headerBuilding.metro}
@@ -329,7 +322,7 @@ export default function BriefPage({
       <div className="flex flex-1 min-h-0 overflow-hidden">
 
         {/* Left — satellite / evidence panel */}
-        <div className="w-[380px] xl:w-[420px] shrink-0 flex flex-col border-r border-gray-800 overflow-hidden">
+        <div className="w-[380px] xl:w-[420px] shrink-0 flex flex-col border-r border-slate-200/60 overflow-hidden shadow-sm">
           {buildingError ? (
             <LeftPanelError message={buildingError} />
           ) : building ? (
@@ -351,14 +344,14 @@ export default function BriefPage({
         </div>
 
         {/* Right — report document */}
-        <div className="flex-1 overflow-y-auto bg-slate-100">
+        <div className="flex-1 overflow-y-auto bg-slate-50/60">
           {briefError ? (
             <RightPanelError
               message={briefError}
               onRetry={() => { setBriefError(null); setRetryKey((k) => k + 1); }}
             />
           ) : reportData ? (
-            <div className="max-w-3xl mx-auto my-6 shadow-2xl rounded-xl overflow-hidden ring-1 ring-slate-200">
+            <div className="max-w-3xl mx-auto my-6 shadow-lg rounded-2xl overflow-hidden border border-slate-200/60">
               <BriefReport data={reportData} />
             </div>
           ) : (

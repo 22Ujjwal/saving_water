@@ -9,23 +9,23 @@ export function KpiSkeleton() {
     <div className="space-y-3">
       <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-3 animate-pulse">
-            <div className="h-2.5 w-20 bg-gray-800 rounded" />
-            <div className="h-7 w-24 bg-gray-800 rounded" />
-            <div className="h-2 w-28 bg-gray-800 rounded" />
+          <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-3 animate-pulse shadow-sm">
+            <div className="h-2 w-20 bg-slate-100 rounded" />
+            <div className="h-7 w-24 bg-slate-100 rounded" />
+            <div className="h-2 w-28 bg-slate-100 rounded" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 animate-pulse">
+      <div className="rounded-2xl border border-teal-100 bg-teal-50/40 p-5 animate-pulse">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 space-y-2">
-            <div className="h-2.5 w-32 bg-gray-800 rounded" />
-            <div className="h-3 w-48 bg-gray-800 rounded" />
-            <div className="h-2 w-64 bg-gray-800 rounded" />
+            <div className="h-2.5 w-32 bg-teal-100 rounded" />
+            <div className="h-3 w-48 bg-teal-100 rounded" />
+            <div className="h-2 w-64 bg-teal-100 rounded" />
           </div>
           <div className="flex flex-col gap-2">
-            <div className="h-12 w-32 bg-gray-800 rounded" />
-            <div className="h-2 w-24 bg-gray-800 rounded" />
+            <div className="h-12 w-32 bg-teal-100 rounded" />
+            <div className="h-2 w-24 bg-teal-100 rounded" />
           </div>
         </div>
       </div>
@@ -72,22 +72,22 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, sub, icon, variant = "default" }: KpiCardProps) {
   const valueColor =
-    variant === "positive" ? "text-emerald-400" :
-    variant === "warning"  ? "text-amber-400"  :
-                             "text-white";
+    variant === "positive" ? "text-emerald-600" :
+    variant === "warning"  ? "text-amber-600"  :
+                             "text-slate-900";
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-2">
+    <div className="bg-white/80 backdrop-blur-sm border border-slate-200/70 rounded-2xl p-4 flex flex-col gap-2 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300/60">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+        <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
           {label}
         </span>
-        {icon && <span className="text-gray-600">{icon}</span>}
+        {icon && <span className="text-slate-300">{icon}</span>}
       </div>
       <span className={cn("text-2xl font-black leading-none tabular-nums", valueColor)}>
         {value}
       </span>
       {sub && (
-        <span className="text-[10px] text-gray-600 leading-snug">{sub}</span>
+        <span className="text-xs text-slate-500 leading-snug">{sub}</span>
       )}
     </div>
   );
@@ -106,7 +106,7 @@ export default function KpiGrid({ data, scenario, cvConfidencePct }: KpiGridProp
 
   return (
     <div className="space-y-3">
-      {/* ── Standard KPI row ───────────────────────────────── */}
+      {/* ── Standard KPI row ────────────────────��──────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
         <KpiCard
           label="Harvestable Gallons"
@@ -187,25 +187,26 @@ export default function KpiGrid({ data, scenario, cvConfidencePct }: KpiGridProp
       </div>
 
       {/* ── Featured: Confidence-Adjusted ROI ─────────────── */}
-      <div className="relative rounded-xl overflow-hidden border border-teal-600/50 bg-teal-900/20 ring-1 ring-teal-500/20 p-5">
-        {/* Glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-900/30 via-transparent to-transparent pointer-events-none" />
+      <div className="relative rounded-2xl overflow-hidden border border-teal-200/80 bg-gradient-to-br from-teal-50/80 to-white/60 backdrop-blur-sm shadow-lg shadow-teal-500/5 p-5">
+        {/* Subtle glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-50/40 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-400/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
           {/* Left: label + explanation */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.18em] text-teal-500">
+              <span className="text-xs font-black uppercase tracking-widest text-teal-600">
                 Core Differentiator
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-400 font-semibold border border-teal-500/30">
+              <span className="text-xs px-2 py-0.5 rounded-lg bg-teal-100 text-teal-700 font-bold border border-teal-200">
                 CV-Adjusted
               </span>
             </div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-teal-300 mb-2">
+            <h3 className="text-sm font-black uppercase tracking-wide text-teal-900 mb-2">
               Confidence-Adjusted ROI
             </h3>
-            <p className="text-[11px] text-teal-400/70 leading-relaxed max-w-md">
+            <p className="text-sm text-teal-700 leading-relaxed max-w-md">
               Satellite CV score ({cvConfidencePct}%) applied directly to the base ROI, making this the
               most conservative and credible figure in the brief. A site survey raises it, not lowers it.
             </p>
@@ -213,28 +214,27 @@ export default function KpiGrid({ data, scenario, cvConfidencePct }: KpiGridProp
 
           {/* Right: the big number */}
           <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
-            <div className="text-[10px] text-teal-500/70 font-semibold uppercase tracking-widest">
+            <div className="text-xs text-teal-600 font-bold uppercase tracking-wide">
               {SCENARIO_LABEL[scenario]} Scenario
             </div>
-            <div className="flex items-end gap-2">
-              <span className="text-5xl font-black text-teal-300 tabular-nums leading-none">
+            <div className="flex items-end gap-1.5">
+              <span className="text-5xl font-black text-teal-700 tabular-nums leading-none">
                 {data.confAdjRoiPct.toFixed(1)}
               </span>
-              <span className="text-2xl font-black text-teal-400 mb-0.5">%</span>
+              <span className="text-3xl font-black text-teal-500 mb-0.5">%</span>
             </div>
             <div className="flex items-center gap-2">
-              {/* CV confidence bar */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] text-teal-600">CV</span>
-                <div className="w-16 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <span className="text-xs text-teal-600">CV</span>
+                <div className="w-16 h-1.5 bg-teal-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-teal-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full"
                     style={{ width: `${cvConfidencePct}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-teal-500 font-semibold">{cvConfidencePct}%</span>
+                <span className="text-xs text-teal-700 font-bold tabular-nums">{cvConfidencePct}%</span>
               </div>
-              <span className="text-[9px] text-gray-600">confidence</span>
+              <span className="text-xs text-slate-500">confidence</span>
             </div>
           </div>
         </div>

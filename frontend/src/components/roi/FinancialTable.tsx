@@ -46,18 +46,16 @@ const SCENARIO_COLS: { key: Scenario; label: string; multiplierBadge: string }[]
 ];
 
 const ACTIVE_COL_BG: Record<Scenario, string> = {
-  conservative: "bg-gray-800/50",
-  base:         "bg-blue-900/20",
-  upside:       "bg-emerald-900/20",
+  conservative: "bg-slate-50/80",
+  base:         "bg-blue-50/60",
+  upside:       "bg-emerald-50/60",
 };
 
 const ACTIVE_COL_HEADER: Record<Scenario, string> = {
-  conservative: "text-gray-300 border-b border-gray-600",
-  base:         "text-blue-300 border-b border-blue-700",
-  upside:       "text-emerald-300 border-b border-emerald-700",
+  conservative: "text-slate-700 border-b-2 border-slate-300",
+  base:         "text-blue-700 border-b-2 border-blue-400",
+  upside:       "text-emerald-700 border-b-2 border-emerald-400",
 };
-
-// ─── Row definitions ──────────────────────────────────────────────────────────
 
 type RowType = "section" | "row";
 
@@ -66,8 +64,8 @@ interface DataRow {
   type: "row";
   label: string;
   render: (row: ScenarioRow) => string;
-  highlight?: boolean; // teal highlight for conf-adj ROI
-  dimmed?: boolean;    // muted styling for secondary rows
+  highlight?: boolean;
+  dimmed?: boolean;
 }
 
 type TableRow = SectionRow | DataRow;
@@ -100,16 +98,16 @@ const TABLE_ROWS: TableRow[] = [
 
 export default function FinancialTable({ data, activeScenario, cvConfidencePct }: FinancialTableProps) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <div className="bg-white/80 backdrop-blur-sm border border-slate-200/70 rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
         <div>
-          <h3 className="text-xs font-bold text-white">Detailed Financial Breakdown</h3>
-          <p className="text-[10px] text-gray-500 mt-0.5">All three scenarios · CV confidence: {cvConfidencePct}%</p>
+          <h3 className="text-sm font-bold text-slate-900">Detailed Financial Breakdown</h3>
+          <p className="text-xs text-slate-500 mt-0.5">All three scenarios · CV confidence: {cvConfidencePct}%</p>
         </div>
-        <div className="flex items-center gap-1.5 bg-teal-900/30 border border-teal-700/40 rounded px-2.5 py-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-          <span className="text-[10px] font-semibold text-teal-300">★ = CV-adjusted differentiator</span>
+        <div className="flex items-center gap-1.5 bg-teal-50 border border-teal-200 rounded-xl px-2.5 py-1 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+          <span className="text-[11px] font-bold text-teal-700">★ = CV-adjusted differentiator</span>
         </div>
       </div>
 
@@ -125,8 +123,8 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
 
           {/* Column headers */}
           <thead>
-            <tr className="border-b border-gray-800">
-              <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            <tr className="border-b border-slate-100">
+              <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-400">
                 Metric
               </th>
               {SCENARIO_COLS.map(({ key, label, multiplierBadge }) => (
@@ -134,21 +132,21 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
                   key={key}
                   className={cn(
                     "text-right px-4 py-3",
-                    key === activeScenario ? ACTIVE_COL_HEADER[key] : "text-gray-600 border-b border-gray-800"
+                    key === activeScenario ? ACTIVE_COL_HEADER[key] : "text-slate-400 border-b border-slate-100"
                   )}
                 >
                   <div className={cn(
                     "text-xs font-bold",
-                    key === activeScenario ? "" : "text-gray-600"
+                    key === activeScenario ? "" : "text-slate-500"
                   )}>
                     {label}
                     {key === activeScenario && (
-                      <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400 font-normal align-middle">
+                      <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold align-middle">
                         active
                       </span>
                     )}
                   </div>
-                  <div className="text-[9px] font-normal mt-0.5 opacity-60 normal-case tracking-normal">
+                  <div className="text-[10px] font-normal mt-0.5 opacity-60 normal-case tracking-normal">
                     {multiplierBadge}
                   </div>
                 </th>
@@ -160,10 +158,10 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
             {TABLE_ROWS.map((row, idx) => {
               if (row.type === "section") {
                 return (
-                  <tr key={idx} className="bg-gray-800/60">
+                  <tr key={idx} className="bg-slate-50/60">
                     <td
                       colSpan={4}
-                      className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-400"
+                      className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400"
                     >
                       {row.label}
                     </td>
@@ -178,18 +176,18 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
                 <tr
                   key={idx}
                   className={cn(
-                    "border-b border-gray-800/50 last:border-0 transition-colors hover:bg-gray-800/30",
-                    isHighlight ? "bg-teal-900/20" : ""
+                    "border-b border-slate-100/60 last:border-0 transition-colors duration-150 hover:bg-slate-50/40",
+                    isHighlight ? "bg-teal-50/40" : ""
                   )}
                 >
                   <td
                     className={cn(
                       "px-4 py-2.5",
                       isHighlight
-                        ? "border-l-2 border-teal-500 font-bold text-teal-300 text-xs"
+                        ? "border-l-2 border-teal-500 font-bold text-teal-700 text-xs"
                         : isDimmed
-                        ? "text-[11px] text-gray-600"
-                        : "text-[11px] text-gray-400"
+                        ? "text-xs text-slate-400"
+                        : "text-xs text-slate-600"
                     )}
                   >
                     {row.label}
@@ -205,13 +203,13 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
                           isActive ? ACTIVE_COL_BG[key] : "",
                           isHighlight
                             ? isActive
-                              ? "text-teal-300 font-bold text-sm"
-                              : "text-teal-600 text-xs"
+                              ? "text-teal-700 font-bold text-sm"
+                              : "text-teal-500 text-xs"
                             : isDimmed
-                            ? "text-gray-600 text-xs"
+                            ? "text-slate-400 text-xs"
                             : isActive
-                            ? "text-white text-xs font-semibold"
-                            : "text-gray-600 text-xs"
+                            ? "text-slate-800 text-xs font-semibold"
+                            : "text-slate-500 text-xs"
                         )}
                       >
                         {val}
@@ -226,12 +224,12 @@ export default function FinancialTable({ data, activeScenario, cvConfidencePct }
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-800 bg-gray-950/50 flex items-center gap-2">
-        <svg className="w-3 h-3 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/40 flex items-center gap-2">
+        <svg className="w-3 h-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" strokeLinecap="round" />
         </svg>
-        <span className="text-[10px] text-gray-600">
-          All values derived from pre-computed model (CLAUDE.md formula chain). Conf-Adj ROI = Base ROI × {cvConfidencePct}% CV score. Site survey raises confidence, not lowers it.
+        <span className="text-[11px] text-slate-400">
+          All values derived from pre-computed model. Conf-Adj ROI = Base ROI × {cvConfidencePct}% CV score. Site survey raises confidence, not lowers it.
         </span>
       </div>
     </div>
