@@ -1,3 +1,27 @@
 CLAUDE.md
 context.md
 .env
+
+# frontend testing
+frontend/coverage
+
+# frontend next.js
+frontend/.next/
+frontend/out/
+
+# frontend production
+frontend/build
+frontend/node_modules/
+
+# frontend misc
+frontend/.DS_Store
+frontend/*.pem
+
+# frontend debug
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# frontend local env files
+frontend/.env*.local

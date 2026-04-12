@@ -19,3 +19,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+
+
+IMPORTANT CONSTRAINTS:
+
+- All data except ROI and AI brief must come from static JSON files
+- Do NOT implement any data scraping, API ingestion, or live external calls
+- Assume all building, state, metro, and CV data is precomputed offline
+- Use placeholder/mock data for:
+  - state_scores.json
+  - buildings.json
+  - imagery_url
+- The only backend calls allowed are:
+  - POST /roi/calculate
+  - POST /brief/generate
+- Do NOT compute ROI in the frontend
+- Do NOT implement RAG in the frontend
+- The frontend is purely:
+  - visualization
+  - interaction
+  - API consumption
