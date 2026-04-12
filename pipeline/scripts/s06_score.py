@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     TARGET_STATES,
     STATE_ABBR_TO_NAME,
+    STATE_DISPLAY_NAMES,
     DATA_PROC,
     OUTPUT_DIR,
     BUILDINGS_JSON,
@@ -45,8 +46,14 @@ log = logging.getLogger(__name__)
 
 # Buildings to include per state in buildings.json (stratified grid sample)
 STATE_SAMPLE_BUDGET = {
-    "TX": 400, "CA": 400, "PA": 400,   # large states
-    "AZ": 300,                           # small state
+    # Large states (dense population / many buildings)
+    "TX": 400, "CA": 400, "PA": 400, "NY": 400,
+    "OH": 400, "NC": 400, "VA": 400, "WA": 400,
+    # Medium states
+    "CO": 300, "MO": 300, "AL": 300, "OK": 300,
+    # Small / sparse states
+    "AZ": 300, "NM": 250, "UT": 250, "MT": 250,
+    "AR": 300, "ID": 250, "IA": 300, "NV": 300, "OR": 300, "TN": 300,
 }
 
 # Financial score: annual savings that maps to score=100
@@ -248,7 +255,7 @@ def build_state_summary(df: pd.DataFrame, state_abbr: str) -> dict:
 
     return {
         # Frontend-expected fields
-        "state":      STATE_ABBR_TO_NAME.get(state_abbr, state_abbr),
+        "state":      STATE_DISPLAY_NAMES.get(state_abbr, STATE_ABBR_TO_NAME.get(state_abbr, state_abbr)),
         "state_code": state_abbr,
         "market_readiness_score": round(df["viability_score"].mean(), 1),
         "top_drivers":    top_drivers[:3],

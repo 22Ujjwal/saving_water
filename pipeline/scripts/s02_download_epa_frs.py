@@ -23,16 +23,19 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger(__name__)
 
 OVERPASS_URL   = "https://overpass-api.de/api/interpreter"
-REQUEST_DELAY  = 2   # seconds between queries (Overpass rate limit)
-TIMEOUT        = 120 # seconds per query
+REQUEST_DELAY  = 3    # seconds between queries (be polite to Overpass)
+TIMEOUT        = 120  # seconds per query
+MAX_RETRIES    = 3    # retries on 429 / 504
+RETRY_BACKOFF  = [10, 25, 60]  # wait seconds for retry 1, 2, 3
 
 # OSM state area tags (ISO 3166-2 codes)
 STATE_ISO = {
-    "TX": "US-TX",
-    "CA": "US-CA",
-    "NY": "US-NY",
-    "AZ": "US-AZ",
-    "PA": "US-PA",
+    "TX": "US-TX", "CA": "US-CA", "NY": "US-NY", "AZ": "US-AZ",
+    "PA": "US-PA", "AL": "US-AL", "CO": "US-CO", "MO": "US-MO",
+    "MT": "US-MT", "NM": "US-NM", "NC": "US-NC", "OH": "US-OH",
+    "OK": "US-OK", "UT": "US-UT", "VA": "US-VA", "WA": "US-WA",
+    "AR": "US-AR", "ID": "US-ID", "IA": "US-IA", "NV": "US-NV",
+    "OR": "US-OR", "TN": "US-TN",
 }
 
 # OSM tag sets that reliably indicate cooling tower presence
@@ -117,13 +120,23 @@ def fetch_facilities_osm(state_abbr: str) -> pd.DataFrame:
 
     for osm_key, osm_value, confidence, desc in COOLING_TOWER_TAGS:
         query = build_overpass_query(STATE_ISO.get(state_abbr, ""), osm_key, osm_value, bbox)
-        try:
-            resp = requests.post(OVERPASS_URL, data={"data": query}, timeout=TIMEOUT + 10)
-            resp.raise_for_status()
-            elements = resp.json().get("elements", [])
-        except Exception as e:
-            log.warning(f"  [{state_abbr}] {osm_key}={osm_value} failed: {e}")
-            time.sleep(REQUEST_DELAY)
+
+        elements = []
+        for attempt in range(MAX_RETRIES):
+            try:
+                resp = requests.post(OVERPASS_URL, data={"data": query}, timeout=TIMEOUT + 10)
+                resp.raise_for_status()
+                elements = resp.json().get("elements", [])
+                break  # success
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = RETRY_BACKOFF[attempt]
+                    log.warning(f"  [{state_abbr}] {osm_key}={osm_value} failed (attempt {attempt+1}): {e} — retrying in {wait}s")
+                    time.sleep(wait)
+                else:
+                    log.warning(f"  [{state_abbr}] {osm_key}={osm_value} failed after {MAX_RETRIES} attempts, skipping.")
+                    time.sleep(REQUEST_DELAY)
+        if not elements and attempt == MAX_RETRIES - 1:
             continue
 
         new = 0

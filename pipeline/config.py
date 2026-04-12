@@ -20,32 +20,77 @@ for d in [DATA_RAW, DATA_PROC, OUTPUT_DIR, TILES_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # ── Target states ──────────────────────────────────────────────────────────────
+# Keys must match GeoJSON filename stem exactly (e.g. "NewYork" → NewYork.geojson)
 TARGET_STATES = {
-    "Texas":        "TX",
-    "California":   "CA",
-    "Arizona":      "AZ",
-    "Pennsylvania": "PA",
+    # Original 4
+    "Texas":         "TX",
+    "California":    "CA",
+    "Arizona":       "AZ",
+    "Pennsylvania":  "PA",
+    # 12 new states
+    "Alabama":       "AL",
+    "Colorado":      "CO",
+    "Missouri":      "MO",
+    "Montana":       "MT",
+    "NewMexico":     "NM",
+    "NewYork":       "NY",
+    "NorthCarolina": "NC",
+    "Ohio":          "OH",
+    "Oklahoma":      "OK",
+    "Utah":          "UT",
+    "Virginia":      "VA",
+    "Washington":    "WA",
+    # 6 additional states
+    "Arkansas":      "AR",
+    "Idaho":         "ID",
+    "Iowa":          "IA",
+    "Nevada":        "NV",
+    "Oregon":        "OR",
+    "Tennessee":     "TN",
 }
-# Maps 2-letter code → full name (for download URLs)
+
+# Maps 2-letter code → file-stem name (for URL construction)
 STATE_ABBR_TO_NAME = {v: k for k, v in TARGET_STATES.items()}
 
+# Human-readable display names (used in state_scores.json "state" field)
+STATE_DISPLAY_NAMES = {
+    "TX": "Texas",
+    "CA": "California",
+    "AZ": "Arizona",
+    "PA": "Pennsylvania",
+    "AL": "Alabama",
+    "CO": "Colorado",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "UT": "Utah",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "AR": "Arkansas",
+    "ID": "Idaho",
+    "IA": "Iowa",
+    "NV": "Nevada",
+    "OR": "Oregon",
+    "TN": "Tennessee",
+}
+
 # ── Microsoft Building Footprints ──────────────────────────────────────────────
-# URL pattern for each state's GeoJSON zip
 MS_FOOTPRINTS_URL = (
     "https://usbuildingdata.blob.core.windows.net/usbuildings-v2/{state_name}.geojsonl.zip"
 )
-ROOF_AREA_MIN_SQFT = 100_000  # flag buildings larger than this
+ROOF_AREA_MIN_SQFT = 100_000  # filter: buildings larger than this
 
 # ── EPA FRS ────────────────────────────────────────────────────────────────────
-# State single-file CSV download page (manual download or scraped)
 EPA_FRS_BASE_URL = "https://www.epa.gov/frs/epa-frs-facilities-state-single-file-csv-download"
-# Direct S3/FTP download pattern (confirmed working):
 EPA_FRS_DOWNLOAD_URL = (
     "https://ordsext.epa.gov/FLA/www3/state_files/{state_abbr_lower}_FACILITIES.zip"
 )
 
 # NAICS prefixes (4-digit) that reliably indicate cooling tower presence
-# Value = (industry description, cooling_tower_confidence 0–1)
 COOLING_TOWER_NAICS = {
     "2211": ("Electric Power Generation/Transmission", 0.98),
     "2212": ("Natural Gas Distribution", 0.85),
@@ -75,18 +120,30 @@ STATE_WATER_RATES = {
     "NY": 10.50,
     "AZ": 4.90,
     "PA": 8.30,
+    "AL": 4.80,
+    "CO": 5.60,
+    "MO": 4.70,
+    "MT": 4.50,
+    "NM": 5.30,
+    "NC": 5.80,
+    "OH": 6.20,
+    "OK": 4.60,
+    "UT": 4.20,
+    "VA": 7.80,
+    "WA": 6.80,
+    "AR": 4.40,
+    "ID": 4.30,
+    "IA": 5.80,
+    "NV": 5.10,
+    "OR": 6.40,
+    "TN": 5.50,
+    # Additional states used as fallback
     "FL": 4.10,
     "IL": 7.20,
-    "WA": 6.80,
-    "CO": 5.60,
-    "NV": 5.10,
 }
 
-# Sewer/discharge rate as fraction of water rate (typical municipal ratio)
-SEWER_RATE_MULTIPLIER = 0.85  # sewer ≈ 85% of water cost for most municipalities
-
-# Fraction of harvested water that avoids sewer discharge
-SEWER_DISCHARGE_FRACTION = 0.70
+SEWER_RATE_MULTIPLIER    = 0.85   # sewer ≈ 85% of water cost
+SEWER_DISCHARGE_FRACTION = 0.70   # fraction of harvested water avoiding sewer discharge
 
 # ── Viability scoring weights ──────────────────────────────────────────────────
 SCORE_WEIGHTS = {
@@ -98,32 +155,58 @@ SCORE_WEIGHTS = {
 }
 
 # Pre-scored regulatory environment per state (0–100)
-# Based on: active stormwater utility fees, state harvesting incentives, permit clarity
 REGULATORY_SCORES = {
-    "TX": 75,   # TCEQ framework, active incentives, clear permit path
-    "CA": 85,   # Strict water regulations → high urgency, strong incentive programs
-    "NY": 80,   # NYC stormwater credit program, high water costs
-    "AZ": 70,   # Water scarcity drives urgency, some municipal rebates
-    "PA": 82,   # Philadelphia Stormwater Billing (impervious surface fee is large)
-    "FL": 65,
-    "WA": 72,
+    "TX": 75,
+    "CA": 85,
+    "NY": 80,
+    "AZ": 70,
+    "PA": 82,
+    "AL": 55,
     "CO": 68,
+    "MO": 58,
+    "MT": 52,
+    "NM": 72,
+    "NC": 65,
+    "OH": 63,
+    "OK": 60,
+    "UT": 70,
+    "VA": 70,
+    "WA": 72,
+    "AR": 58,
+    "ID": 60,
+    "IA": 62,
     "NV": 73,
+    "OR": 70,
+    "TN": 62,
+    "FL": 65,
     "IL": 62,
 }
 
 # Drought / climate risk index per state (0–100, higher = more urgent)
-# Based on: NOAA drought monitor, EPA climate risk, water restriction history
 DROUGHT_INDEX = {
     "TX": 65,
     "CA": 90,
     "NY": 30,
     "AZ": 95,
     "PA": 28,
-    "FL": 55,
-    "WA": 45,
+    "AL": 30,
     "CO": 72,
+    "MO": 40,
+    "MT": 58,
+    "NM": 90,
+    "NC": 38,
+    "OH": 32,
+    "OK": 68,
+    "UT": 85,
+    "VA": 35,
+    "WA": 45,
+    "AR": 45,
+    "ID": 62,
+    "IA": 42,
     "NV": 93,
+    "OR": 55,
+    "TN": 40,
+    "FL": 55,
     "IL": 35,
 }
 
@@ -132,10 +215,8 @@ RUNOFF_COEFFICIENT   = 0.85   # collection efficiency for flat commercial roofs
 GALLON_PER_SQFT_INCH = 0.623  # gallons collected per sqft per inch of rain
 
 # ── NOAA Climate Normals ───────────────────────────────────────────────────────
-# 1991-2020 US Climate Normals hosted on AWS Open Data
-NOAA_NORMALS_S3 = "s3://noaa-climate-normals-pds/normals-annualseasonal/1991-2020/"
-# CDO API (free, requires registration)
-NOAA_CDO_API_BASE = "https://www.ncei.noaa.gov/access/services/data/v1"
+NOAA_NORMALS_S3   = "s3://noaa-climate-normals-pds/normals-annualseasonal/1991-2020/"
+NOAA_CDO_API_BASE = "https://www.ncei.noaa.gov/cdo-web/api/v2"
 NOAA_CDO_TOKEN    = os.getenv("NOAA_CDO_TOKEN", "")
 
 # ── Census TIGER boundaries ────────────────────────────────────────────────────
@@ -153,20 +234,37 @@ OVERTURE_S3_PATH = (
     "/theme=buildings/type=building/*"
 )
 
-# Bounding boxes for target states [min_lon, min_lat, max_lon, max_lat]
+# Bounding boxes [min_lon, min_lat, max_lon, max_lat]
 STATE_BBOXES = {
     "TX": (-106.65, 25.84,  -93.51, 36.50),
     "CA": (-124.48, 32.53, -114.13, 42.01),
     "AZ": (-114.82, 31.33, -109.05, 37.00),
     "PA": ( -80.52, 39.72,  -74.69, 42.27),
+    "AL": ( -88.47, 30.22,  -84.89, 35.01),
+    "CO": (-109.06, 36.99, -102.04, 41.00),
+    "MO": ( -95.77, 35.99,  -89.10, 40.61),
+    "MT": (-116.05, 44.36, -104.04, 49.00),
+    "NM": (-109.05, 31.33, -103.00, 37.00),
+    "NY": ( -79.76, 40.50,  -71.86, 45.02),
+    "NC": ( -84.32, 33.84,  -75.46, 36.59),
+    "OH": ( -84.82, 38.40,  -80.52, 41.98),
+    "OK": (-103.00, 33.62,  -94.43, 37.00),
+    "UT": (-114.05, 36.99, -109.05, 42.00),
+    "VA": ( -83.68, 36.54,  -75.24, 39.47),
+    "WA": (-124.73, 45.54, -116.92, 49.00),
+    "AR": ( -94.62, 33.00,  -89.64, 36.50),
+    "ID": (-117.24, 41.99, -111.04, 49.00),
+    "IA": ( -96.64, 40.37,  -90.14, 43.50),
+    "NV": (-120.01, 35.00, -114.04, 42.00),
+    "OR": (-124.57, 41.99, -116.46, 46.26),
+    "TN": ( -90.31, 34.98,  -81.65, 36.68),
 }
 
 # ── Google Maps Static API (Step 7 — CV layer) ────────────────────────────────
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
-NOAA_CDO_API_BASE   = "https://www.ncei.noaa.gov/cdo-web/api/v2"
 SATELLITE_TILE_ZOOM = 18
 SATELLITE_TILE_SIZE = "640x640"
 
-# ── Output files ──────────────────────────────────────────────────────────────
-BUILDINGS_JSON   = OUTPUT_DIR / "buildings.json"
+# ── Output files ───────────────────────────────────────────────────────────────
+BUILDINGS_JSON    = OUTPUT_DIR / "buildings.json"
 STATE_SCORES_JSON = OUTPUT_DIR / "state_scores.json"

@@ -32,14 +32,20 @@ REQUEST_DELAY = 0.25  # seconds between API calls
 
 # State FIPS codes for CDO location filter
 STATE_FIPS = {
-    "TX": "48", "CA": "06", "NY": "36",
-    "AZ": "04", "PA": "42", "FL": "12",
+    "TX": "48", "CA": "06", "NY": "36", "AZ": "04", "PA": "42",
+    "AL": "01", "CO": "08", "MO": "29", "MT": "30", "NM": "35",
+    "NC": "37", "OH": "39", "OK": "40", "UT": "49", "VA": "51",
+    "WA": "53", "FL": "12",
+    "AR": "05", "ID": "16", "IA": "19", "NV": "32", "OR": "41", "TN": "47",
 }
 
 # Fallback annual precip (inches) if API unavailable
 STATE_PRECIP_FALLBACK = {
-    "TX": 29.5, "CA": 22.2, "NY": 46.7,
-    "AZ": 13.6, "PA": 42.9, "FL": 54.5,
+    "TX": 29.5, "CA": 22.2, "NY": 46.7, "AZ": 13.6, "PA": 42.9,
+    "AL": 56.9, "CO": 15.9, "MO": 42.2, "MT": 15.3, "NM": 14.6,
+    "NC": 50.3, "OH": 39.1, "OK": 36.5, "UT": 12.2, "VA": 44.3,
+    "WA": 38.4, "FL": 54.5,
+    "AR": 50.6, "ID": 18.9, "IA": 34.7, "NV": 9.5, "OR": 27.4, "TN": 54.0,
 }
 
 

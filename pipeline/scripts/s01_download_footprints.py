@@ -57,6 +57,9 @@ def find_local_file(state_name: str) -> Path | None:
     Look for a Microsoft Building Footprints file for this state in data/raw/.
     Tries multiple filename patterns (mixed case, with/without zip).
     """
+    # normalised variants: original, lowercase, no-underscore, no-space
+    nospace = state_name.replace("_", "").replace(" ", "")
+    nounderscore = state_name.replace("_", " ")
     candidates = [
         f"{state_name}.geojsonl.zip",
         f"{state_name}.geojsonl",
@@ -65,8 +68,12 @@ def find_local_file(state_name: str) -> Path | None:
         f"{state_name.lower()}.geojsonl.zip",
         f"{state_name.lower()}.geojsonl",
         f"{state_name.lower()}.geojson",
-        f"{state_name.replace('_', ' ')}.geojsonl.zip",
-        f"{state_name.replace('_', ' ')}.geojsonl",
+        f"{nounderscore}.geojsonl.zip",
+        f"{nounderscore}.geojsonl",
+        f"{nounderscore}.geojson",
+        f"{nospace}.geojsonl.zip",
+        f"{nospace}.geojsonl",
+        f"{nospace}.geojson",
     ]
     for name in candidates:
         path = DATA_RAW / name
