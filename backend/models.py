@@ -14,10 +14,17 @@ class BuildingRecord(BaseModel):
     building_type: str
     owner_tenant: Optional[str] = None
 
+    lat: float = 0.0
+    lng: float = 0.0
+
     roof_area_sqft: float
     cooling_tower_present: bool
     cooling_tower_count: int = 0
     cv_confidence_score: float = Field(ge=0.0, le=1.0)
+
+    imagery_url: Optional[str] = None
+    imagery_date: Optional[str] = None
+    imagery_source: Optional[str] = None
 
     annual_rainfall_in: float
     water_rate_per_kgal: float

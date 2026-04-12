@@ -17,6 +17,7 @@ Output: data/processed/large_buildings_{STATE}.gpkg
 
 import sys
 import json
+import math
 import zipfile
 import logging
 from pathlib import Path
@@ -252,46 +253,116 @@ def query_overture_fallback(state_abbr: str) -> gpd.GeoDataFrame:
 
 # ── Filter + standardise ──────────────────────────────���────────────────────────
 
+# ── Filter thresholds ─────────────────────────────────────────────────────────
+ROOF_AREA_MAX_SQFT   = 1_000_000   # land parcels / farms above this
+COMPACTNESS_MIN      = 0.10        # (4π·area)/perimeter² — circles=1, spiky shapes→0
+BBOX_FILL_MIN        = 0.30        # polygon area / bounding-box area
+ASPECT_RATIO_MAX     = 10.0        # width:height or height:width
+KEEP_BUILDING_CLASSES = {
+    "commercial", "industrial", "warehouse", "retail", "office",
+    "hospital", "hotel", "manufacturing", "civic", "government",
+    "school", "university", "transportation", "storage",
+}
+DROP_BUILDING_CLASSES = {"residential", "agricultural", "unknown"}
+
+
+def _log_step(state_abbr: str, label: str, before: int, after: int) -> None:
+    removed = before - after
+    pct = removed / before * 100 if before else 0
+    log.info(f"[{state_abbr}] {label}: {before:,} → {after:,}  (−{removed:,} / {pct:.1f}%)")
+
+
 def filter_and_standardise(gdf: gpd.GeoDataFrame, state_abbr: str) -> gpd.GeoDataFrame:
     """
-    Reproject to equal-area CRS, compute roof_area_sqft, filter, add IDs.
-    Works whether the input came from a local file or Overture.
+    Multi-stage filtering to remove non-building polygons (farms, land, lakes).
+    All geometry work is done in EPSG:5070 (equal-area metres).
     """
     if gdf.crs is None:
         gdf = gdf.set_crs("EPSG:4326")
 
-    # Compute area in sqft using equal-area projection
-    gdf_metric = gdf.to_crs(AREA_CRS)
-    gdf["roof_area_sqft"] = (gdf_metric.geometry.area * 10.7639).round(0).astype(int)
+    # Project once to equal-area for all geometry metrics
+    gdf_m = gdf.to_crs(AREA_CRS)
+    n_raw = len(gdf_m)
+    log.info(f"[{state_abbr}] Raw polygons: {n_raw:,}")
 
-    # Filter
-    large = gdf[gdf["roof_area_sqft"] >= ROOF_AREA_MIN_SQFT].copy()
+    # Pre-compute geometry metrics (vectorised — fast)
+    area_m2   = gdf_m.geometry.area
+    perim_m   = gdf_m.geometry.length
+    bounds    = gdf_m.geometry.bounds                          # minx miny maxx maxy
+    bbox_w    = (bounds["maxx"] - bounds["minx"]).clip(lower=1)
+    bbox_h    = (bounds["maxy"] - bounds["miny"]).clip(lower=1)
+    bbox_area = bbox_w * bbox_h
+
+    gdf["roof_area_sqft"] = (area_m2 * 10.7639).round(0).astype(int)
+    gdf["_compactness"]   = (4 * math.pi * area_m2) / perim_m.clip(lower=1) ** 2
+    gdf["_bbox_fill"]     = area_m2 / bbox_area
+    gdf["_aspect_ratio"]  = (bbox_w / bbox_h).combine(bbox_h / bbox_w, max)
+    gdf["filter_reason"]  = ""
+
+    # ── Stage 1: Area bounds ──────────────────────────────────────────────────
+    n0 = len(gdf)
+    gdf.loc[gdf["roof_area_sqft"] < ROOF_AREA_MIN_SQFT,  "filter_reason"] = "too_small"
+    gdf.loc[gdf["roof_area_sqft"] > ROOF_AREA_MAX_SQFT,  "filter_reason"] = "too_large"
+    passed = gdf[gdf["filter_reason"] == ""].copy()
+    _log_step(state_abbr, "Stage 1 — area bounds", n0, len(passed))
+
+    # ── Stage 2: Compactness (spiky / irregular shapes) ───────────────────────
+    n1 = len(passed)
+    passed.loc[passed["_compactness"] < COMPACTNESS_MIN, "filter_reason"] = "low_compactness"
+    passed = passed[passed["filter_reason"] == ""].copy()
+    _log_step(state_abbr, "Stage 2 — compactness", n1, len(passed))
+
+    # ── Stage 3: Bounding-box fill (sparse / L-shaped land) ──────────────────
+    n2 = len(passed)
+    passed.loc[passed["_bbox_fill"] < BBOX_FILL_MIN, "filter_reason"] = "low_bbox_fill"
+    passed = passed[passed["filter_reason"] == ""].copy()
+    _log_step(state_abbr, "Stage 3 — bbox fill", n2, len(passed))
+
+    # ── Stage 4: Aspect ratio (extreme elongation) ────────────────────────────
+    n3 = len(passed)
+    passed.loc[passed["_aspect_ratio"] > ASPECT_RATIO_MAX, "filter_reason"] = "extreme_aspect_ratio"
+    passed = passed[passed["filter_reason"] == ""].copy()
+    _log_step(state_abbr, "Stage 4 — aspect ratio", n3, len(passed))
+
+    # ── Stage 5: Building class filter ───────────────────────────────────────
+    if "building_class" in passed.columns:
+        n4 = len(passed)
+        bad_class = (
+            passed["building_class"].isin(DROP_BUILDING_CLASSES) &
+            ~passed["building_class"].isin(KEEP_BUILDING_CLASSES)
+        )
+        passed.loc[bad_class, "filter_reason"] = "bad_building_class"
+        passed = passed[passed["filter_reason"] == ""].copy()
+        _log_step(state_abbr, "Stage 5 — building class", n4, len(passed))
+
+    # ── Summary ───────────────────────────────────────────────────────────────
+    total_removed = n_raw - len(passed)
+    log.info(
+        f"[{state_abbr}] TOTAL: {n_raw:,} → {len(passed):,}  "
+        f"(removed {total_removed:,} / {total_removed/n_raw*100:.1f}%)"
+    )
+
+    # ── Standardise output ────────────────────────────────────────────────────
+    large = passed.copy()
     large["state"] = state_abbr
-
-    # Ensure WGS84 for all downstream steps
     large = large.to_crs("EPSG:4326")
 
-    # Centroids
     centroids = large.geometry.centroid
     large["centroid_lon"] = centroids.x.round(6)
     large["centroid_lat"] = centroids.y.round(6)
 
-    # Unique IDs
     large = large.reset_index(drop=True)
     large["building_id"] = [f"{state_abbr}_{i:06d}" for i in range(len(large))]
 
-    # Ensure address/class columns exist (may be absent in Microsoft files)
-    if "fac_name"      not in large.columns: large["fac_name"]      = ""
-    if "fac_address"   not in large.columns: large["fac_address"]   = ""
+    if "fac_name"       not in large.columns: large["fac_name"]       = ""
+    if "fac_address"    not in large.columns: large["fac_address"]    = ""
     if "building_class" not in large.columns: large["building_class"] = "commercial"
 
     keep = ["building_id", "state", "roof_area_sqft", "building_class",
-            "fac_name", "fac_address", "centroid_lon", "centroid_lat", "geometry"]
+            "fac_name", "fac_address", "centroid_lon", "centroid_lat",
+            "filter_reason", "geometry"]
     available = [c for c in keep if c in large.columns]
-    large = large[available]
-
-    log.info(f"[{state_abbr}] Buildings > {ROOF_AREA_MIN_SQFT:,} sqft: {len(large):,}")
-    return large
+    return large[available]
 
 
 def save(gdf: gpd.GeoDataFrame, state_abbr: str) -> Path:

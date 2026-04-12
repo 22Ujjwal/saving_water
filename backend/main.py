@@ -17,6 +17,19 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
+
+
+def get_static_map_url(lat: float, lng: float, zoom: int = 18, size: str = "640x640", maptype: str = "satellite") -> str:
+    return (
+        "https://maps.googleapis.com/maps/api/staticmap"
+        f"?center={lat},{lng}"
+        f"&zoom={zoom}"
+        f"&size={size}"
+        f"&maptype={maptype}"
+        f"&key={GOOGLE_MAPS_API_KEY}"
+    )
+
 app = FastAPI(title="RainUSE Nexus API")
 
 # CORS_ORIGINS env var overrides the default (comma-separated for multiple origins)
@@ -52,14 +65,22 @@ def get_building(building_id: str) -> BuildingRecord:
     return BUILDINGS[building_id]
 
 
+def _inject_imagery(b: BuildingRecord) -> dict:
+    data = b.model_dump()
+    if GOOGLE_MAPS_API_KEY and b.lat and b.lng:
+        data["imagery_url"] = get_static_map_url(b.lat, b.lng)
+        data["imagery_source"] = "Google Maps Satellite"
+    return data
+
+
 @app.get("/buildings", response_model=list[BuildingRecord])
 def list_buildings():
-    return list(BUILDINGS.values())
+    return [_inject_imagery(b) for b in BUILDINGS.values()]
 
 
 @app.get("/buildings/{building_id}", response_model=BuildingRecord)
 def get_building_by_id(building_id: str):
-    return get_building(building_id)
+    return _inject_imagery(get_building(building_id))
 
 
 @app.post("/roi", response_model=ROIResponse)

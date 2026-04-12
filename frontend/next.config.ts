@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:",
               "worker-src 'self' blob:",
               "connect-src 'self' https://*.cartocdn.com https://*.basemaps.cartocdn.com https://basemaps.cartocdn.com https://services.arcgisonline.com http://localhost:8000",
-              "img-src 'self' data: blob: https://*.cartocdn.com https://*.basemaps.cartocdn.com https://services.arcgisonline.com",
+              "img-src 'self' data: blob: https://*.cartocdn.com https://*.basemaps.cartocdn.com https://services.arcgisonline.com https://maps.googleapis.com",
               "style-src 'self' 'unsafe-inline' https://*.cartocdn.com https://basemaps.cartocdn.com",
               "font-src 'self' data:",
             ].join("; "),
