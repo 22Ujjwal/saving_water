@@ -7,11 +7,11 @@ type FilterPanelProps = {
   setSelection: React.Dispatch<React.SetStateAction<SelectionState>>;
 };
 
-const FILTER_META: Record<keyof SelectionState["filters"], { label: string; sub?: string; color: string }> = {
-  roofAboveThreshold: { label: "Roof area > 150K sqft",    sub: "Large commercial footprint",   color: "bg-blue-500" },
-  coolingTowerOnly:   { label: "Cooling tower detected",   sub: "Confirmed CV detection",        color: "bg-emerald-500" },
-  highWaterCostOnly:  { label: "High water cost metro",    sub: "≥ $10/kgal water rate",         color: "bg-amber-500" },
-  esgPrioritizedOnly: { label: "ESG-prioritized owner",    sub: "SBTi, LEED, or ESG score >80",  color: "bg-purple-500" },
+const FILTER_META: Record<keyof SelectionState["filters"], { label: string; sub?: string; dotColor: string; activeGlow: string }> = {
+  roofAboveThreshold: { label: "Roof area > 150K sqft",    sub: "Large commercial footprint",   dotColor: "bg-blue-400",    activeGlow: "shadow-blue-500/20" },
+  coolingTowerOnly:   { label: "Cooling tower detected",   sub: "Confirmed CV detection",        dotColor: "bg-emerald-400", activeGlow: "shadow-emerald-500/20" },
+  highWaterCostOnly:  { label: "High water cost metro",    sub: "≥ $10/kgal water rate",         dotColor: "bg-amber-400",   activeGlow: "shadow-amber-500/20" },
+  esgPrioritizedOnly: { label: "ESG-prioritized owner",    sub: "SBTi, LEED, or ESG score >80",  dotColor: "bg-purple-400",  activeGlow: "shadow-purple-500/20" },
 };
 
 export default function FilterPanel({ selection, setSelection }: FilterPanelProps) {
@@ -30,17 +30,19 @@ export default function FilterPanel({ selection, setSelection }: FilterPanelProp
           <button
             key={key}
             onClick={() => toggle(key)}
-            className={`w-full text-left flex items-start gap-3 px-2.5 py-2 rounded-md transition-colors ${
-              active ? "bg-slate-700/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" : "hover:bg-slate-800/60"
+            className={`w-full text-left flex items-start gap-3 px-3 py-3 rounded-xl transition-all duration-200 border ${
+              active
+                ? `bg-white/[0.1] border-white/20 shadow-md ${meta.activeGlow}`
+                : "bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08] hover:border-white/10"
             }`}
           >
-            <span className={`mt-0.5 w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-white/20 ${active ? meta.color : "bg-slate-600"}`} />
-            <div className="min-w-0">
-              <div className={`text-xs font-medium leading-tight ${active ? "text-white" : "text-slate-300"}`}>
+            <span className={`mt-1 w-2 h-2 rounded-full shrink-0 transition-all duration-200 ${active ? meta.dotColor : "bg-slate-600"}`} />
+            <div className="min-w-0 flex-1">
+              <div className={`text-xs font-medium leading-tight transition-colors duration-200 ${active ? "text-slate-100" : "text-slate-400"}`}>
                 {meta.label}
               </div>
               {active && meta.sub && (
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate">{meta.sub}</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">{meta.sub}</div>
               )}
             </div>
           </button>

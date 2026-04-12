@@ -43,7 +43,8 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
 
   if (!s) {
     return (
-      <div className="rounded-xl bg-slate-900/95 border border-slate-700/60 p-4 text-slate-400 text-sm">
+      <div className="rounded-2xl border border-white/[0.08] p-4 text-slate-500 text-xs"
+        style={{ background: "rgba(255,255,255,0.05)" }}>
         No data for this state.
       </div>
     );
@@ -54,24 +55,25 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
   return (
     <div className="space-y-3">
       {/* Header card */}
-      <div className="rounded-xl bg-slate-900/95 border border-slate-700/60 p-4 shadow-[0_12px_40px_rgba(2,6,23,0.35)]">
-        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1">State</p>
-        <div className="flex items-start justify-between gap-2">
-          <h2 className="text-lg font-bold text-white leading-tight">{s.state}</h2>
+      <div className="rounded-2xl border border-white/[0.08] p-4"
+        style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-3">State Overview</p>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-xl font-bold text-slate-100 leading-tight">{s.state}</h2>
           <div className="text-right shrink-0">
-            <div className="text-2xl font-black text-white leading-none">{s.market_readiness_score}</div>
-            <div className={`text-[10px] font-bold uppercase tracking-wide ${color}`}>{label}</div>
+            <div className="text-3xl font-bold text-white leading-none">{s.market_readiness_score}</div>
+            <div className={`text-[10px] font-semibold uppercase tracking-wide mt-1 ${color}`}>{label}</div>
           </div>
         </div>
 
         {s.top_drivers.length > 0 && (
           <div className="mt-3">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1.5">Top Drivers</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Top Drivers</p>
             <div className="flex flex-wrap gap-1.5">
               {s.top_drivers.map((d, i) => (
                 <span
                   key={i}
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${DRIVER_COLORS[i % DRIVER_COLORS.length]}`}
+                  className={`text-[11px] font-medium px-2 py-0.5 rounded-lg border ${DRIVER_COLORS[i % DRIVER_COLORS.length]}`}
                 >
                   {d}
                 </span>
@@ -83,20 +85,21 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
 
       {/* Score breakdown bars */}
       {s.score_breakdown && (
-        <div className="rounded-xl bg-slate-900/95 border border-slate-700/60 p-4 shadow-[0_12px_40px_rgba(2,6,23,0.35)]">
-          <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-3">Score Breakdown</p>
-          <div className="space-y-2.5">
+        <div className="rounded-2xl border border-white/[0.08] p-4"
+          style={{ background: "rgba(255,255,255,0.05)" }}>
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-3">Score Breakdown</p>
+          <div className="space-y-3">
             {Object.entries(s.score_breakdown).map(([key, val]) => {
               if (val === undefined) return null;
               const pct = Math.min(100, Math.max(0, val));
               return (
                 <div key={key}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[11px] text-slate-200">{BREAKDOWN_LABELS[key] ?? key}</span>
-                    <span className="text-[11px] font-bold text-white">{val}</span>
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-xs text-slate-400">{BREAKDOWN_LABELS[key] ?? key}</span>
+                    <span className="text-xs font-semibold text-slate-200">{val}</span>
                   </div>
-                  <div className="h-1 bg-slate-700/90 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${barColor(pct)}`} style={{ width: `${pct}%` }} />
+                  <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-500 ${barColor(pct)}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );

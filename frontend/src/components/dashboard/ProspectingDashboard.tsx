@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import LeftPanel from "./LeftPanel";
 import RightPanel from "./RightPanel";
@@ -99,7 +99,7 @@ export default function ProspectingDashboard() {
     // Filter by toggle states
     const f = selection.filters;
     if (f.roofAboveThreshold) {
-      result = result.filter(b => b.roof_area_sqft > 50000); 
+      result = result.filter(b => b.roof_area_sqft > 50000);
     }
     if (f.coolingTowerOnly) {
       result = result.filter(b => b.cooling_tower_present);
@@ -110,7 +110,7 @@ export default function ProspectingDashboard() {
     if (f.esgPrioritizedOnly) {
       result = result.filter(b => b.sbti_committed || b.leed_certified || (b.esg_score_proxy && b.esg_score_proxy > 80));
     }
-    
+
     return result;
   }, [buildings, selection]);
 
@@ -133,17 +133,38 @@ export default function ProspectingDashboard() {
   }, [selection.selectedBuildingId]);
 
   if (isLoadingData) {
-    return <div className="flex h-screen w-full items-center justify-center bg-slate-950 text-slate-300 font-medium tracking-wide">Loading Foundation Data...</div>;
+    return (
+      <div className="flex h-screen w-full items-center justify-center dashboard-bg">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-12 h-12">
+            <svg className="w-12 h-12 animate-spin" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+              <path d="M24 4 a20 20 0 0 1 20 20" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            </div>
+          </div>
+          <p className="text-slate-300 text-sm font-medium tracking-wide">Loading Foundation Data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (dataError) {
-    return <div className="flex h-screen w-full items-center justify-center bg-slate-950 text-red-400 font-medium">Error: {dataError}</div>;
+    return (
+      <div className="flex h-screen w-full items-center justify-center dashboard-bg">
+        <div className="glass-card-dark p-6 max-w-sm text-center">
+          <p className="text-red-400 font-medium">Error: {dataError}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen w-full bg-slate-950 text-white overflow-hidden">
+    <div className="flex h-screen w-full dashboard-bg text-slate-100 overflow-hidden">
       {/* Left Panel */}
-      <div className="w-56 h-full border-r border-slate-800 flex flex-col shrink-0 z-10 hidden md:flex">
+      <div className="w-56 h-full flex flex-col shrink-0 z-10 hidden md:flex border-r border-white/[0.08]">
         <LeftPanel selection={selection} setSelection={setSelection} />
       </div>
 
@@ -159,7 +180,7 @@ export default function ProspectingDashboard() {
       </div>
 
       {/* Right Panel */}
-      <div className="w-[340px] h-full border-l border-slate-800 flex flex-col shrink-0 z-10 overflow-y-auto hidden lg:flex">
+      <div className="w-[340px] h-full flex flex-col shrink-0 z-10 overflow-y-auto hidden lg:flex border-l border-white/[0.08]">
         <RightPanel
           selection={selection}
           setSelection={setSelection}

@@ -10,7 +10,7 @@ import FinancialTable, { type ScenarioRow } from "@/components/roi/FinancialTabl
 import { fetchROI, fetchBuilding } from "@/lib/api";
 import type { ROIResponse, BuildingInfo } from "@/types/roi";
 
-// ─── Scenario multipliers (mirrors roi_engine.py, used for display-only fields) ─
+// ─── Scenario multipliers ─────────────────────────────────────────────────────
 
 const SCENARIO_MULTIPLIERS: Record<Scenario, { rainfall: number; efficiency: number }> = {
   conservative: { rainfall: 0.75, efficiency: 0.80 },
@@ -18,7 +18,7 @@ const SCENARIO_MULTIPLIERS: Record<Scenario, { rainfall: number; efficiency: num
   upside:       { rainfall: 1.15, efficiency: 0.90 },
 };
 
-// ─── Adapters: map ROIResponse → component prop shapes ────────────────────────
+// ─── Adapters ─────────────────────────────────────────────────────────────────
 
 function toKpis(r: ROIResponse): RoiKpis {
   return {
@@ -34,7 +34,6 @@ function toKpis(r: ROIResponse): RoiKpis {
 }
 
 function toSavings(r: ROIResponse): SavingsData {
-  // incentive amortization is not returned separately — derive it as the remainder
   const incentiveAmort = Math.max(
     0,
     r.total_annual_savings_usd
@@ -83,7 +82,6 @@ function toTableRow(
   };
 }
 
-/** Cumulative net cash flow for Year 0–10 from a single ROI response */
 function toCumulative(r: ROIResponse): number[] {
   return Array.from({ length: 11 }, (_, y) =>
     -r.capex_mid_usd + r.total_annual_savings_usd * y
@@ -94,20 +92,20 @@ function toCumulative(r: ROIResponse): number[] {
 
 function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="bg-rose-950/40 border border-rose-700/50 rounded-xl p-6 flex flex-col gap-4">
+    <div className="bg-white border border-red-200 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
       <div className="flex items-start gap-3">
-        <svg className="w-5 h-5 text-rose-400 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="w-5 h-5 text-red-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
           <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
         </svg>
         <div>
-          <p className="text-sm font-semibold text-rose-300 mb-1">Unable to load ROI data</p>
-          <p className="text-xs text-rose-400/80 leading-relaxed">{message}</p>
+          <p className="text-sm font-semibold text-slate-900 mb-1">Unable to load ROI data</p>
+          <p className="text-sm text-slate-500 leading-relaxed">{message}</p>
         </div>
       </div>
       <button
         onClick={onRetry}
-        className="self-start px-4 py-2 rounded-lg bg-rose-800/50 hover:bg-rose-700/50 border border-rose-600/50 text-sm font-semibold text-rose-200 transition-colors"
+        className="self-start px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-sm font-semibold text-red-700 transition-all duration-200"
       >
         Try again
       </button>
@@ -119,8 +117,8 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 
 function PanelSkeleton({ height = "h-64" }: { height?: string }) {
   return (
-    <div className={`bg-gray-900 border border-gray-800 rounded-xl ${height} flex items-center justify-center animate-pulse`}>
-      <div className="text-[10px] font-semibold uppercase tracking-widest text-gray-700">
+    <div className={`bg-white/80 border border-slate-200/70 rounded-2xl ${height} flex items-center justify-center animate-pulse shadow-sm backdrop-blur-sm`}>
+      <div className="text-xs font-semibold uppercase tracking-widest text-slate-300">
         Loading…
       </div>
     </div>
@@ -144,7 +142,7 @@ export default function RoiPage({
   const [error, setError]         = useState<string | null>(null);
   const [retryKey, setRetryKey]   = useState(0);
 
-  // ── Initial load: building + all 3 scenarios ──────────────────────────────
+  // ── Initial load ─────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -172,7 +170,7 @@ export default function RoiPage({
     return () => { cancelled = true; };
   }, [buildingId, retryKey]);
 
-  // ── Scenario change: refetch if somehow not cached ────────────────────────
+  // ── Scenario change ───────────────────────────────────────────────────────
   useEffect(() => {
     if (loading || roiCache[scenario]) return;
 
@@ -223,9 +221,6 @@ export default function RoiPage({
 
   const cvConfidencePct = activeRoi?.cv_confidence_pct ?? 81;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
-  // Header fallback while building loads
   const headerBuilding = building ?? {
     address: buildingId,
     metro: "—", state: "—", building_type: "—",
@@ -234,9 +229,9 @@ export default function RoiPage({
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-950 text-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20 text-slate-900">
 
-      {/* Sticky header — renders immediately with fallback values */}
+      {/* Sticky header */}
       <RoiHeader
         buildingId={buildingId}
         address={headerBuilding.address}
@@ -249,10 +244,10 @@ export default function RoiPage({
         scenario={scenario}
       />
 
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-6 py-6 space-y-6">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8 space-y-6">
 
         {/* Scenario toggle */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl px-5 py-3">
+        <div className="bg-white/80 backdrop-blur-sm border border-slate-200/70 rounded-2xl px-6 py-4 shadow-sm">
           <ScenarioToggle scenario={scenario} onChange={setScenario} />
         </div>
 
@@ -264,7 +259,7 @@ export default function RoiPage({
           />
         )}
 
-        {/* KPI grid — skeleton while loading, real data once ready */}
+        {/* KPI grid */}
         {loading || loadingScenario || !currentKpis ? (
           <KpiSkeleton />
         ) : (
@@ -279,7 +274,7 @@ export default function RoiPage({
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
             {loading ? (
-              <PanelSkeleton height="h-[320px]" />
+              <PanelSkeleton height="h-80" />
             ) : (
               <CumulativeChart
                 activeScenario={scenario}
@@ -289,7 +284,7 @@ export default function RoiPage({
           </div>
           <div className="lg:col-span-2">
             {loading || !currentSavings ? (
-              <PanelSkeleton height="h-[320px]" />
+              <PanelSkeleton height="h-80" />
             ) : (
               <SavingsBreakdown data={currentSavings} />
             )}
