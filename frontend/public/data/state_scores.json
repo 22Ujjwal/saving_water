@@ -1,0 +1,85 @@
+[
+  {
+    "state": "California",
+    "state_code": "CA",
+    "market_readiness_score": 95,
+    "top_drivers": ["Water Scarcity", "High Rates", "ESG Focus"],
+    "score_breakdown": {
+      "water_cost_pressure": 97,
+      "rainfall_capture": 52,
+      "commercial_density": 88,
+      "regulatory_pressure": 96,
+      "esg_alignment": 94
+    },
+    "candidate_count": 8,
+    "metros": [
+      {
+        "metro": "Los Angeles",
+        "state_code": "CA",
+        "market_readiness_score": 98,
+        "top_drivers": ["Severe Drought", "Incentives"],
+        "candidate_count": 4
+      },
+      {
+        "metro": "San Francisco",
+        "state_code": "CA",
+        "market_readiness_score": 92,
+        "top_drivers": ["High Water Cost", "ESG Push"],
+        "candidate_count": 4
+      }
+    ]
+  },
+  {
+    "state": "Texas",
+    "state_code": "TX",
+    "market_readiness_score": 88,
+    "top_drivers": ["Rapid Growth", "Drought Risk", "Industrial Demand"],
+    "score_breakdown": {
+      "water_cost_pressure": 76,
+      "rainfall_capture": 84,
+      "commercial_density": 90,
+      "regulatory_pressure": 72,
+      "esg_alignment": 73
+    },
+    "candidate_count": 8,
+    "metros": [
+      {
+        "metro": "Austin",
+        "state_code": "TX",
+        "market_readiness_score": 91,
+        "top_drivers": ["Population Boom", "Tech ESG Targets"],
+        "candidate_count": 4
+      },
+      {
+        "metro": "Houston",
+        "state_code": "TX",
+        "market_readiness_score": 85,
+        "top_drivers": ["Flooding Issues", "Industrial Scale"],
+        "candidate_count": 4
+      }
+    ]
+  },
+  {
+    "state": "New York",
+    "state_code": "NY",
+    "market_readiness_score": 82,
+    "top_drivers": ["Sewer Constraints", "Local Law 97", "Incentives"],
+    "score_breakdown": {
+      "water_cost_pressure": 81,
+      "rainfall_capture": 61,
+      "commercial_density": 87,
+      "regulatory_pressure": 93,
+      "esg_alignment": 79
+    },
+    "candidate_count": 3,
+    "metros": [
+      {
+        "metro": "New York City",
+        "state_code": "NY",
+        "market_readiness_score": 94,
+        "top_drivers": ["Regulatory Compliance", "CSO Mitigation"],
+        "candidate_count": 3
+      }
+    ]
+  }
+]

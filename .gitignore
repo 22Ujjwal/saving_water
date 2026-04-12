@@ -1,29 +1,47 @@
-# Environment & secrets
+# ── Secrets & AI files ────────────────────────────────────────────────────────
 .env
-pipeline/venv/
-venv/
+.claude/
+CLAUDE.md
+context.md
+GEMINI.md
+LICENSE
+
+# ── Python ─────────────────────────────────────────────────────────────────────
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
 
-# Claude AI files
-.claude/
+# ── Virtual environments ───────────────────────────────────────────────────────
+venv/
+pipeline/venv/
 
-# Raw & processed data (large files, not needed in repo)
+# ── Pipeline data (large files) ────────────────────────────────────────────────
 pipeline/data/raw/
 pipeline/data/processed/
-
-# macOS
-.DS_Store
-**/.DS_Store
-
-# Geospatial intermediates
 *.gpkg
 *.zip
 *.geojson
 
-# Python eggs / dist
-*.egg-info/
-dist/
-build/
+# ── macOS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Frontend — Next.js ─────────────────────────────────────────────────────────
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/node_modules/
+frontend/coverage/
+frontend/.DS_Store
+frontend/*.pem
+frontend/.env*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
