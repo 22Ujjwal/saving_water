@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RainUSE Nexus",
+  title: "Pluvial",
   description: "Prospect-to-Proposal Engine",
 };
 

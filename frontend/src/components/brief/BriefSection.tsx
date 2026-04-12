@@ -31,7 +31,7 @@ export default function BriefSection({
   const a = ACCENT[accent];
   return (
     <section className={cn("py-8 border-b border-slate-100 last:border-0", className)}>
-      <div className={cn("flex items-start gap-3 mb-5 pl-4 border-l-4", a.bar)}>
+      <div className={cn("print-keep-heading flex items-start gap-3 mb-5 pl-4 border-l-4", a.bar)}>
         <div>
           <span className={cn("text-xs font-bold uppercase tracking-widest block leading-none mb-1", a.number)}>
             {number}

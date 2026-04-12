@@ -78,12 +78,8 @@ export default function RoiHeader({
           </Link>
           <span className="text-slate-200">·</span>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-sm shadow-blue-500/30">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-white">
-                <path d="M8 2c-.5 2-2 3.5-2 5.5a2 2 0 0 0 4 0C10 5.5 8.5 4 8 2z" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-slate-800">RainUSE Nexus</span>
+            <img src="/assets/Hand Holding Water Droplet.png" alt="Pluvial" className="w-16 h-16 object-contain" />
+            <span className="text-sm font-black tracking-tight bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent">Pluvial</span>
             <span className="text-sm text-slate-400">/ ROI Analysis</span>
           </div>
         </div>

@@ -68,7 +68,7 @@ function KpiCard({ kpi }: { kpi: FinancialKpi }) {
   return (
     <div
       className={`
-        rounded-xl border px-4 py-4 flex flex-col gap-2 shadow-sm transition-all duration-200 hover:shadow-md
+        print-no-break rounded-xl border px-4 py-4 flex flex-col gap-2 shadow-sm transition-all duration-200 hover:shadow-md
         ${kpi.highlight
           ? "bg-teal-50/80 border-teal-200 backdrop-blur-sm"
           : "bg-white/80 border-slate-200/70 backdrop-blur-sm"
@@ -207,7 +207,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
           </div>
 
           {/* Confidence-adjusted ROI callout */}
-          <div className="bg-teal-50/80 border border-teal-200 rounded-xl px-5 py-4 mb-5 flex items-start gap-4 backdrop-blur-sm shadow-sm">
+          <div className="print-no-break bg-teal-50/80 border border-teal-200 rounded-xl px-5 py-4 mb-5 flex items-start gap-4 backdrop-blur-sm shadow-sm">
             <div className="shrink-0 mt-0.5">
               <svg className="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A8 8 0 0 1 4.07 9h.07a1 1 0 0 1 0 2A6 6 0 0 0 11 16.93zM12 7a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"/>
@@ -247,7 +247,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
           </div>
 
           {/* CapEx + incentive row */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="print-no-break grid grid-cols-3 gap-3">
             <div className="bg-slate-50/80 border border-slate-200 rounded-xl px-4 py-3 text-center backdrop-blur-sm shadow-sm">
               <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 font-bold">CapEx Range</div>
               <div className="text-sm font-bold text-slate-900 tabular-nums">
@@ -362,7 +362,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
             {data.nextSteps.steps.map((step) => (
               <div
                 key={step.order}
-                className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50/80 border border-slate-100 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-200"
+                className="print-no-break flex items-start gap-3 p-3.5 rounded-xl bg-slate-50/80 border border-slate-100 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-200"
               >
                 <div className="shrink-0 w-7 h-7 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center shadow-sm">
                   <span className="text-[10px] font-black text-rose-600">{step.order}</span>
@@ -378,7 +378,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
               </div>
             ))}
           </div>
-          <div className="bg-slate-900 rounded-2xl px-5 py-5 shadow-lg">
+          <div className="print-no-break print-no-break-before bg-slate-900 rounded-2xl px-5 py-5 shadow-lg">
             <p className="text-sm text-slate-300 leading-relaxed italic">
               {data.nextSteps.closingStatement}
             </p>
@@ -390,7 +390,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
       <div className="px-8 py-5 border-t border-slate-100 mt-2">
         <div className="flex items-center justify-between">
           <span className="text-[9px] text-slate-300 font-mono">
-            RainUSE Nexus · AI Investment Brief · {data.buildingRef}
+            Pluvial · AI Investment Brief · {data.buildingRef}
           </span>
           <span className="text-[9px] text-slate-300">
             Generated {data.generatedAt} · Pre-validation draft

@@ -193,3 +193,91 @@
 .scrollbar-dark::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* ── PDF / Print styles ───────────────────────────────────────────────────── */
+
+@media print {
+  @page {
+    margin: 1.4cm 1.8cm;
+    size: A4;
+  }
+
+  /* Let page flow naturally */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  /* Force background colors and images to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide elements that shouldn't be in the PDF */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Fix the page container — undo h-screen overflow-hidden */
+  .brief-page-root {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Inner body row — undo flex + overflow-hidden */
+  .print-body {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  /* Full-width report panel */
+  .brief-report-panel {
+    width: 100% !important;
+    flex: none !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Report card wrapper — remove overflow-hidden clip */
+  .print-report-wrapper {
+    overflow: visible !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Avoid page breaks inside grouped content */
+  .print-no-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Keep section headings with their first block of content */
+  .print-keep-heading {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Add a small top margin between sections */
+  .print-section-gap {
+    margin-top: 0.6cm;
+  }
+
+  /* Don't orphan the closing dark box */
+  .print-no-break-before {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+}

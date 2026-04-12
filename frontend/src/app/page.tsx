@@ -16,10 +16,8 @@ export default function Home() {
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/[0.08]"
         style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(24px)" }}>
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-600/30">
-            <div className="w-2 h-2 bg-white rounded-full" />
-          </div>
-          <span className="text-xl font-semibold text-white">RainUSE Nexus</span>
+          <img src="/assets/Hand Holding Water Droplet.png" alt="Pluvial" className="w-24 h-24 object-contain" />
+          <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent drop-shadow-sm">Pluvial</span>
         </div>
 
         <nav className="hidden md:flex items-center space-x-8 text-sm text-slate-400">
@@ -49,7 +47,7 @@ export default function Home() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              18 states · 50K+ buildings analyzed
+              Rainfall → Revenue · Real-time savings analysis
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.05] tracking-tight">
               Identify water<br />
@@ -84,7 +82,7 @@ export default function Home() {
         {/* Right side: Stats cards */}
         <div className="flex-1 flex flex-col gap-4 w-full max-w-sm">
           {[
-            { value: "18", label: "States analyzed", color: "from-blue-500/20 to-blue-600/10", accent: "text-blue-400" },
+            { value: "22", label: "States analyzed", color: "from-blue-500/20 to-blue-600/10", accent: "text-blue-400" },
             { value: "50K+", label: "Buildings scored", color: "from-cyan-500/20 to-cyan-600/10", accent: "text-cyan-400" },
             { value: "Real-time", label: "ROI calculations", color: "from-emerald-500/20 to-emerald-600/10", accent: "text-emerald-400" },
           ].map(({ value, label, color, accent }) => (

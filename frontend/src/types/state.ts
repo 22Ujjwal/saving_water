@@ -23,4 +23,10 @@ export type StateScore = {
   score_breakdown?: ScoreBreakdown;
   candidate_count?: number;
   metros: MetroScore[];
+  // Pipeline-computed aggregate fields (from s06_score.py → state_scores.json)
+  avg_roof_area_sqft?: number;
+  pct_cooling_tower?: number;
+  avg_annual_rainfall_in?: number;
+  avg_annual_savings_usd?: number;
+  top_building_score?: number;
 };

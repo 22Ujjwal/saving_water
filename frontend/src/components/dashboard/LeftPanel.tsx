@@ -33,11 +33,9 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/[0.08]">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md shadow-blue-600/30 shrink-0">
-            <div className="w-1.5 h-1.5 bg-white rounded-full" />
-          </div>
+          <img src="/assets/Hand Holding Water Droplet.png" alt="Pluvial" className="w-20 h-20 object-contain shrink-0" />
           <div className="min-w-0">
-            <h1 className="text-sm font-bold text-white leading-tight truncate">RainUSE Nexus</h1>
+            <h1 className="text-base font-black tracking-tight bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent leading-tight">Pluvial</h1>
             <p className="text-xs text-slate-500 leading-tight">Prospecting Engine</p>
           </div>
         </div>
