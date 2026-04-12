@@ -32,10 +32,10 @@ export default function RightPanel(props: RightPanelProps) {
 
   if (selection.mapMode === "national") {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-6 bg-gray-950">
-        <div className="text-gray-600 text-3xl mb-3">↗</div>
-        <p className="text-sm font-semibold text-gray-300 mb-1">Click any state to begin</p>
-        <p className="text-xs text-gray-600 leading-relaxed">
+      <div className="h-full flex flex-col items-center justify-center text-center px-6 bg-slate-950">
+        <div className="text-slate-500 text-3xl mb-3">↗</div>
+        <p className="text-sm font-semibold text-slate-100 mb-1">Click any state to begin</p>
+        <p className="text-xs text-slate-400 leading-relaxed">
           States are scored by market readiness. Select one to view metrics and top metros.
         </p>
       </div>
@@ -43,7 +43,7 @@ export default function RightPanel(props: RightPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-950 overflow-y-auto">
+    <div className="flex flex-col h-full bg-slate-950 overflow-y-auto">
       {selection.mapMode === "state" && (
         <div className="p-4 space-y-3">
           <StateSummaryPanel selection={selection} stateScores={props.stateScores} />

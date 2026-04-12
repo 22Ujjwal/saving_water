@@ -15,7 +15,7 @@ export default function MetroSummaryPanel({ selection, setSelection, stateScores
 
   if (!currentState || currentState.metros.length === 0) {
     return (
-      <div className="rounded-lg bg-gray-900 border border-gray-700/50 p-4 text-gray-500 text-sm">
+      <div className="rounded-xl bg-slate-900/95 border border-slate-700/60 p-4 text-slate-400 text-sm">
         No metros available for this state.
       </div>
     );
@@ -24,21 +24,21 @@ export default function MetroSummaryPanel({ selection, setSelection, stateScores
   const metros = [...currentState.metros].sort((a, b) => b.market_readiness_score - a.market_readiness_score);
 
   return (
-    <div className="rounded-lg bg-gray-900 border border-gray-700/50 p-4">
-      <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-3">Metric Markets</p>
+    <div className="rounded-xl bg-slate-900/95 border border-slate-700/60 p-4 shadow-[0_12px_40px_rgba(2,6,23,0.35)]">
+      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-3">Metric Markets</p>
       <div className="space-y-1.5">
         {metros.map((m) => (
           <button
             key={m.metro}
             onClick={() => setSelection(prev => ({ ...prev, mapMode: "metro", selectedMetro: m.metro }))}
-            className="w-full text-left flex items-center justify-between gap-3 px-3 py-2.5 rounded-md bg-gray-800/50 hover:bg-gray-700/60 border border-gray-700/40 hover:border-gray-600/60 transition-colors group"
+            className="w-full text-left flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-500/70 transition-colors group"
           >
             <div className="min-w-0">
               <div className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
                 {m.metro.split(",")[0]}
               </div>
               {m.top_drivers.length > 0 && (
-                <div className="text-[10px] text-gray-500 truncate mt-0.5">
+                <div className="text-[10px] text-slate-400 truncate mt-0.5">
                   {m.top_drivers.join(" · ")}
                 </div>
               )}

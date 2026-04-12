@@ -41,8 +41,8 @@ function fmtGal(n: number): string {
 
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-800/60 last:border-0">
-      <span className="text-[11px] text-gray-500">{label}</span>
+    <div className="flex items-center justify-between py-1.5 border-b border-slate-800/70 last:border-0">
+      <span className="text-[11px] text-slate-300">{label}</span>
       <span className="text-[11px] font-semibold text-white">{value}</span>
     </div>
   );
@@ -52,34 +52,34 @@ export default function BuildingProfilePanel({
   selection, filteredBuildings, isCalculatingRoi, onCalculateRoi, isGeneratingBrief, onGenerateBrief,
 }: Props) {
   const building = filteredBuildings.find(b => b.building_id === selection.selectedBuildingId);
-  if (!building) return <div className="p-4 text-gray-500 text-sm">No building selected.</div>;
+  if (!building) return <div className="p-4 text-slate-400 text-sm">No building selected.</div>;
 
   const angle = ANGLE_STYLES[building.recommended_angle];
   const cvPct = Math.round(building.cv_confidence_score * 100);
   const cvColor = cvPct >= 90 ? "text-emerald-400" : cvPct >= 70 ? "text-amber-400" : "text-red-400";
 
   return (
-    <div className="flex flex-col bg-gray-950">
+    <div className="flex flex-col bg-slate-950">
 
       {/* ── Header ─────────────────────────────────────────────── */}
-      <div className="px-4 pt-4 pb-3 border-b border-gray-800">
+      <div className="px-4 pt-4 pb-3 border-b border-slate-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="text-base font-bold text-white truncate">{building.address.split(",")[0]}</h2>
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-xs text-slate-400 mt-0.5 truncate">
               {building.metro}, {building.state} • {building.building_type.replace(/_/g, " ")}
             </p>
           </div>
           <div className="shrink-0 text-right">
             <div className="text-2xl font-black text-white leading-none">{building.viability_score}</div>
-            <div className="text-[9px] uppercase tracking-widest text-gray-500 font-semibold">Viability</div>
+            <div className="text-[9px] uppercase tracking-widest text-slate-400 font-semibold">Viability</div>
           </div>
         </div>
 
         {/* Detection confidence + angle */}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-gray-800 rounded-md px-2.5 py-1">
-            <span className="text-[10px] text-gray-500 font-medium">Detection confidence:</span>
+          <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700/50 rounded-md px-2.5 py-1">
+            <span className="text-[10px] text-slate-300 font-medium">Detection confidence:</span>
             <span className={`text-xs font-black ${cvColor}`}>{cvPct}%</span>
           </div>
           <span className={`text-[10px] font-semibold px-2 py-1 rounded border ${angle.badge}`}>
@@ -89,8 +89,8 @@ export default function BuildingProfilePanel({
       </div>
 
       {/* ── Agency Drivers ─────────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-2">Agency Drivers</p>
+      <div className="px-4 py-3 border-b border-slate-800">
+        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Agency Drivers</p>
         <ul className="space-y-1">
           {building.urgency_drivers.map((d, i) => (
             <li key={i} className={`text-xs font-medium flex items-start gap-1.5 ${DRIVER_COLORS[i % DRIVER_COLORS.length]}`}>
@@ -102,8 +102,8 @@ export default function BuildingProfilePanel({
       </div>
 
       {/* ── Physical ───────────────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">Physical</p>
+      <div className="px-4 py-3 border-b border-slate-800">
+        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1">Physical</p>
         <MetricRow label="Roof Area"        value={`${(building.roof_area_sqft / 1000).toFixed(0)}K sqft`} />
         <MetricRow label="Annual Rainfall"  value={`${building.annual_rainfall_in}"`} />
         <MetricRow label="Harvestable"      value={fmtGal(building.harvestable_gal_yr)} />
@@ -115,8 +115,8 @@ export default function BuildingProfilePanel({
       </div>
 
       {/* ── Financial Snapshot ─────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">Financial Snapshot</p>
+      <div className="px-4 py-3 border-b border-slate-800">
+        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1">Financial Snapshot</p>
         <MetricRow label="Annual Water Savings"  value={fmtUsd(building.annual_water_savings_usd)} />
         <MetricRow label="Annual Sewer Savings"  value={fmtUsd(building.annual_sewer_savings_usd)} />
         <MetricRow label="Incentive Value"        value={fmtUsd(building.incentive_value_usd)} />
@@ -130,7 +130,7 @@ export default function BuildingProfilePanel({
       </div>
 
       {/* ── CV Evidence metadata ────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-gray-800">
+      <div className="px-4 py-3 border-b border-slate-800">
         <CvEvidencePanel building={building} />
       </div>
 
@@ -146,7 +146,7 @@ export default function BuildingProfilePanel({
         <button
           onClick={() => onGenerateBrief(building)}
           disabled={isGeneratingBrief}
-          className="w-full py-2.5 rounded-md bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold text-gray-200 border border-gray-700 transition-colors"
+          className="w-full py-2.5 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold text-slate-100 border border-slate-700 transition-colors"
         >
           {isGeneratingBrief ? "Generating..." : "Generate Brief"}
         </button>

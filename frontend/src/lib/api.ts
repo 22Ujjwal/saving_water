@@ -1,3 +1,52 @@
+import type { ROIResponse, BuildingInfo, BriefAPIResponse } from "@/types/roi";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export async function fetchBuilding(buildingId: string): Promise<BuildingInfo> {
+  const res = await fetch(`${API_BASE}/buildings/${buildingId}`);
+  if (!res.ok) {
+    throw new Error(
+      res.status === 404
+        ? `Building "${buildingId}" not found`
+        : `Failed to load building (${res.status})`
+    );
+  }
+  return res.json();
+}
+
+export async function fetchROI(
+  buildingId: string,
+  scenario: "conservative" | "base" | "upside"
+): Promise<ROIResponse> {
+  const res = await fetch(`${API_BASE}/roi`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ building_id: buildingId, scenario }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      (detail as { detail?: string }).detail ?? `ROI request failed (${res.status})`
+    );
+  }
+  return res.json();
+}
+
+export async function fetchBrief(buildingId: string): Promise<BriefAPIResponse> {
+  const res = await fetch(`${API_BASE}/brief`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ building_id: buildingId }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      (detail as { detail?: string }).detail ?? `Brief request failed (${res.status})`
+    );
+  }
+  return res.json();
+}
+
 export async function loadBuildings() {
   const res = await fetch("/data/buildings.json");
   if (!res.ok) throw new Error("Failed to load buildings");
@@ -11,31 +60,8 @@ export async function loadStateScores() {
 }
 
 export async function loadStatesGeoJSON() {
-  // Use the newly optimized subset of continental states
   // The choropleth uses 'feature.properties.postal' mapping to 'state_code' in state_scores.json
   const res = await fetch("/data/states.optimized.geojson");
   if (!res.ok) throw new Error("Failed to load states GeoJSON");
-  return res.json();
-}
-
-export async function calculateRoi(building: unknown) {
-  const res = await fetch("http://localhost:8000/roi/calculate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(building),
-  });
-
-  if (!res.ok) throw new Error("Failed to calculate ROI");
-  return res.json();
-}
-
-export async function generateBrief(payload: unknown) {
-  const res = await fetch("http://localhost:8000/brief/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) throw new Error("Failed to generate brief");
   return res.json();
 }

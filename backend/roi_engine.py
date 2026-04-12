@@ -46,7 +46,7 @@ def calc_scenario(building: BuildingRecord, scenario: str = "base") -> dict:
     capex          = capex_mid * m["capex"]
     payback        = capex / total_savings if total_savings else 0
     npv            = calc_npv(total_savings, capex)
-    base_roi       = ((total_savings * 10) - capex) / capex * 100
+    base_roi       = ((total_savings * 10) - capex) / capex * 100 if capex else 0.0
     adj_roi        = base_roi * building.cv_confidence_score
     co2_offset     = (harvestable / 1000) * CO2_LBS_PER_KGAL
 
