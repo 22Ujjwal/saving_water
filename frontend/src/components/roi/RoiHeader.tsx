@@ -7,6 +7,7 @@ type RecommendedAngle = "cost_savings" | "resilience" | "compliance" | "esg_cred
 type Scenario = "conservative" | "base" | "upside";
 
 interface RoiHeaderProps {
+  buildingId: string;
   address: string;
   metro: string;
   state: string;
@@ -43,6 +44,7 @@ const VIABILITY_COLOR = (score: number) =>
                "text-rose-400 bg-rose-500/10 border-rose-500/30";
 
 export default function RoiHeader({
+  buildingId,
   address,
   metro,
   state,
@@ -120,7 +122,7 @@ export default function RoiHeader({
             {angle.label}
           </div>
           <Link
-            href={`/brief/${address}`}
+            href={`/brief/${buildingId}`}
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 text-[11px] font-semibold text-gray-300 transition-colors"
           >
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

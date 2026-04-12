@@ -238,6 +238,7 @@ export default function RoiPage({
 
       {/* Sticky header — renders immediately with fallback values */}
       <RoiHeader
+        buildingId={buildingId}
         address={headerBuilding.address}
         metro={headerBuilding.metro}
         state={headerBuilding.state}
