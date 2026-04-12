@@ -25,6 +25,7 @@ from pyproj import Transformer
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     TARGET_STATES,
+    STATE_ABBR_TO_NAME,
     DATA_PROC,
     OUTPUT_DIR,
     BUILDINGS_JSON,
@@ -195,9 +196,44 @@ def score_state(gdf: gpd.GeoDataFrame, state_abbr: str) -> pd.DataFrame:
     return df
 
 
+def build_metro_summaries(df: pd.DataFrame, state_abbr: str) -> list:
+    """Group buildings by city (fall back to county) → per-metro summary."""
+    df = df.copy()
+    df["_metro"] = df["city_name"].replace("", pd.NA).fillna(df["county_name"]).fillna("Unknown")
+
+    metros = []
+    for metro_name, group in df.groupby("_metro"):
+        if len(group) < 3:
+            continue
+        avg_score = round(group["viability_score"].mean(), 1)
+        # Derive top drivers for this metro
+        drivers = []
+        if STATE_WATER_RATES.get(state_abbr, 5) > 7:
+            drivers.append("High water utility costs")
+        if DROUGHT_INDEX.get(state_abbr, 50) > 70:
+            drivers.append("Drought & water scarcity pressure")
+        if group["cooling_tower"].mean() > 0.1:
+            drivers.append("Cooling tower density")
+        if not drivers:
+            drivers = ["Rainwater harvesting potential"]
+        metros.append({
+            "metro":                  str(metro_name),
+            "state_code":             state_abbr,
+            "market_readiness_score": avg_score,
+            "top_drivers":            drivers[:2],
+            "candidate_count":        len(group),
+        })
+
+    return sorted(metros, key=lambda x: x["market_readiness_score"], reverse=True)
+
+
 def build_state_summary(df: pd.DataFrame, state_abbr: str) -> dict:
-    """Aggregate metrics for state_scores.json."""
-    ct_pct = df["cooling_tower"].mean() if len(df) > 0 else 0.0
+    """Aggregate metrics for state_scores.json (frontend-compatible schema)."""
+    ct_pct      = df["cooling_tower"].mean() if len(df) > 0 else 0.0
+    avg_rain    = round(df["annual_rainfall_in"].mean(), 1)
+    avg_savings = round(df["annual_total_savings"].mean(), 0)
+    candidate_count = len(df)
+
     top_drivers = []
     if STATE_WATER_RATES.get(state_abbr, 5) > 7:
         top_drivers.append("High water utility costs")
@@ -211,50 +247,136 @@ def build_state_summary(df: pd.DataFrame, state_abbr: str) -> dict:
         top_drivers = ["Commercial building density", "Rainfall availability"]
 
     return {
-        "state": state_abbr,
+        # Frontend-expected fields
+        "state":      STATE_ABBR_TO_NAME.get(state_abbr, state_abbr),
+        "state_code": state_abbr,
         "market_readiness_score": round(df["viability_score"].mean(), 1),
-        "top_drivers": top_drivers[:3],
-        "candidate_count": len(df),
-        "avg_roof_area_sqft": int(df["roof_area_sqft"].mean()),
-        "pct_cooling_tower": round(ct_pct, 3),
-        "avg_annual_rainfall_in": round(df["annual_rainfall_in"].mean(), 1),
-        "avg_annual_savings_usd": round(df["annual_total_savings"].mean(), 0),
-        "top_building_score": df["viability_score"].max(),
+        "top_drivers":    top_drivers[:3],
+        "candidate_count": candidate_count,
+        "score_breakdown": {
+            "water_cost_pressure":  round(min(STATE_WATER_RATES.get(state_abbr, 5.0) / 12.0 * 100, 100), 1),
+            "rainfall_capture":     round(min(avg_rain / 60.0 * 100, 100), 1),
+            "commercial_density":   round(min(candidate_count / 150.0, 1.0) * 100, 1),
+            "regulatory_pressure":  float(REGULATORY_SCORES.get(state_abbr, 50)),
+            "esg_alignment":        50.0,
+        },
+        "metros": build_metro_summaries(df, state_abbr),
+        # Extra detail fields
+        "avg_roof_area_sqft":     int(df["roof_area_sqft"].mean()),
+        "pct_cooling_tower":      round(ct_pct, 3),
+        "avg_annual_rainfall_in": avg_rain,
+        "avg_annual_savings_usd": avg_savings,
+        "top_building_score":     df["viability_score"].max(),
+    }
+
+
+def derive_urgency_drivers(bd: dict) -> list:
+    """Derive human-readable urgency drivers from score breakdown."""
+    sb = bd.get("score_breakdown", {})
+    drivers = []
+    if sb.get("financial", 0) > 60:
+        drivers.append("High water cost savings potential")
+    if sb.get("climate_risk", 0) > 70:
+        drivers.append("Severe drought / water scarcity risk")
+    if sb.get("regulatory", 0) > 75:
+        drivers.append("Strong incentive & regulatory environment")
+    if bd.get("cooling_tower_present"):
+        drivers.append("Cooling tower water recycling opportunity")
+    if sb.get("physical", 0) > 70:
+        drivers.append("Large harvestable roof area")
+    return drivers[:3] or ["Rainwater harvesting candidate"]
+
+
+def compute_financials(roof_sqft: int, annual_savings: float, cv_confidence: float) -> dict:
+    """Estimate capex, payback, NPV, and ROI from roof area and savings."""
+    capex_low = round(roof_sqft * 0.50, 0)
+    capex_high = round(roof_sqft * 1.50, 0)
+    capex_mid = (capex_low + capex_high) / 2
+
+    payback = round(capex_mid / annual_savings, 1) if annual_savings > 0 else None
+
+    # NPV at 6% discount over 10 years
+    pv_factor = (1 - (1.06 ** -10)) / 0.06   # ≈ 7.36
+    npv = round(annual_savings * pv_factor - capex_mid, 0)
+
+    conf = max(cv_confidence, 0.1)   # avoid zero denominator
+    roi = round((annual_savings / capex_mid) * conf * 100, 1) if capex_mid > 0 else 0.0
+
+    incentive = round(annual_savings * 0.30, 2)
+
+    return {
+        "system_capex_range": [capex_low, capex_high],
+        "simple_payback_yrs": payback,
+        "npv_10yr_usd":       npv,
+        "confidence_adj_roi_pct": roi,
+        "incentive_value_usd": incentive,
     }
 
 
 def to_building_record(row: pd.Series) -> dict:
-    """Format a single building for buildings.json."""
-    return {
-        "building_id":   row["building_id"],
-        "address":       row["address"] or row.get("fac_name", ""),
-        "facility_name": row.get("fac_name", ""),
-        "coordinates":   [row["centroid_lat"], row["centroid_lon"]],
-        "state":         row["state"],
-        "city":          row.get("city_name", ""),
-        "county":        row.get("county_name", ""),
-        "county_fips":   row.get("county_fips", ""),
-        "building_class": row.get("building_class", "commercial"),
-        "roof_area_sqft": row["roof_area_sqft"],
-        "cooling_tower":  row["cooling_tower"],
-        "cooling_tower_source":     row.get("cooling_tower_source", "none"),
-        "cooling_tower_confidence": row["cooling_tower_confidence"],
-        "annual_rainfall_in":        row["annual_rainfall_in"],
-        "annual_harvestable_gallons": int(row["annual_harvestable_gallons"]),
-        "water_rate_per_kgal":        row["water_rate_per_kgal"],
-        "annual_water_savings_usd":   row["annual_water_savings"],
-        "annual_sewer_savings_usd":   row["annual_sewer_savings"],
-        "annual_total_savings_usd":   row["annual_total_savings"],
-        "viability_score": row["viability_score"],
-        "score_breakdown": {
-            "physical":     row["score_physical"],
-            "financial":    row["score_financial"],
-            "regulatory":   row["score_regulatory"],
-            "esg":          row["score_esg"],
-            "climate_risk": row["score_climate_risk"],
-        },
-        "satellite_tile_path": f"tiles/{row['building_id']}.jpg",
+    """Format a single building for buildings.json (frontend-compatible schema)."""
+    state      = row["state"]
+    water_rate = float(row.get("water_rate_per_kgal", STATE_WATER_RATES.get(state, 5.0)))
+    total_sav  = float(row.get("annual_total_savings", 0.0))
+    roof_sqft  = int(row.get("roof_area_sqft", 0))
+    cv_conf    = float(row.get("cooling_tower_confidence", 0.0))
+    ct_present = bool(row.get("cooling_tower", False))
+
+    score_bd = {
+        "physical":     row.get("score_physical", 0),
+        "financial":    row.get("score_financial", 0),
+        "regulatory":   row.get("score_regulatory", 0),
+        "esg":          row.get("score_esg", 50),
+        "climate_risk": row.get("score_climate_risk", 0),
     }
+
+    fin = compute_financials(roof_sqft, total_sav, cv_conf)
+
+    record = {
+        # Identifiers
+        "building_id":    row["building_id"],
+        "address":        row.get("address") or row.get("fac_name") or "",
+        "metro":          row.get("city_name") or row.get("county_name") or "",
+        "state":          state,
+        # Coordinates (split for frontend)
+        "lat":            row.get("centroid_lat"),
+        "lng":            row.get("centroid_lon"),
+        # Extra geo (pipeline bonus, ignored by frontend)
+        "city":           row.get("city_name", ""),
+        "county":         row.get("county_name", ""),
+        "county_fips":    row.get("county_fips", ""),
+        # Building attributes
+        "roof_geometry":  None,
+        "building_type":  row.get("building_class", "commercial"),
+        "imagery_date":   None,
+        "imagery_source": None,
+        "imagery_url":    None,
+        "roof_area_sqft": roof_sqft,
+        # Cooling tower
+        "cooling_tower_present":    ct_present,
+        "cooling_tower_count":      1 if ct_present else 0,
+        "cooling_tower_source":     row.get("cooling_tower_source", "none"),
+        "cv_confidence_score":      cv_conf,
+        # Water data
+        "annual_rainfall_in":       float(row.get("annual_rainfall_in", 0.0)),
+        "harvestable_gal_yr":       int(row.get("annual_harvestable_gallons", 0)),
+        "water_rate_per_kgal":      water_rate,
+        "sewer_rate_per_kgal":      round(water_rate * SEWER_RATE_MULTIPLIER, 2),
+        "annual_water_savings_usd": float(row.get("annual_water_savings", 0.0)),
+        "annual_sewer_savings_usd": float(row.get("annual_sewer_savings", 0.0)),
+        "annual_total_savings_usd": total_sav,
+        # Financial estimates
+        **fin,
+        # Scoring
+        "viability_score":    row["viability_score"],
+        "urgency_score":      row["viability_score"],
+        "drought_risk_index": DROUGHT_INDEX.get(state, 50),
+        "flood_risk_index":   0,
+        "score_breakdown":    score_bd,
+        "urgency_drivers":    derive_urgency_drivers({"score_breakdown": score_bd, "cooling_tower_present": ct_present}),
+        "recommended_angle":  None,
+    }
+    return record
 
 
 def stratified_sample(df: pd.DataFrame, budget: int) -> pd.DataFrame:
@@ -323,7 +445,7 @@ def stratified_sample(df: pd.DataFrame, budget: int) -> pd.DataFrame:
 def run(states: dict = None):
     states = states or TARGET_STATES
     all_buildings   = []
-    state_summaries = {}
+    state_summaries = []   # array — frontend expects list not dict
 
     for _, state_abbr in states.items():
         addressed_path = DATA_PROC / f"buildings_addressed_{state_abbr}.gpkg"
@@ -341,7 +463,7 @@ def run(states: dict = None):
         scored  = score_state(gdf, state_abbr)
 
         # State summary uses all buildings
-        state_summaries[state_abbr] = build_state_summary(scored, state_abbr)
+        state_summaries.append(build_state_summary(scored, state_abbr))
 
         # buildings.json uses stratified grid sample
         budget = STATE_SAMPLE_BUDGET.get(state_abbr, 300)
