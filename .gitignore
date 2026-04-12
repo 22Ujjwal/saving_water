@@ -1,0 +1,29 @@
+# Environment & secrets
+.env
+pipeline/venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Claude AI files
+.claude/
+
+# Raw & processed data (large files, not needed in repo)
+pipeline/data/raw/
+pipeline/data/processed/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Geospatial intermediates
+*.gpkg
+*.zip
+*.geojson
+
+# Python eggs / dist
+*.egg-info/
+dist/
+build/

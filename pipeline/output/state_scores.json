@@ -1,0 +1,58 @@
+{
+  "TX": {
+    "state": "TX",
+    "market_readiness_score": 39.0,
+    "top_drivers": [
+      "Commercial building density",
+      "Rainfall availability"
+    ],
+    "candidate_count": 11400,
+    "avg_roof_area_sqft": 194980,
+    "pct_cooling_tower": 0.02,
+    "avg_annual_rainfall_in": 39.5,
+    "avg_annual_savings_usd": 2811.0,
+    "top_building_score": 69.2
+  },
+  "CA": {
+    "state": "CA",
+    "market_readiness_score": 43.5,
+    "top_drivers": [
+      "High water utility costs",
+      "Drought & water scarcity pressure",
+      "Strong regulatory / incentive environment"
+    ],
+    "candidate_count": 10533,
+    "avg_roof_area_sqft": 207597,
+    "pct_cooling_tower": 0.022,
+    "avg_annual_rainfall_in": 15.7,
+    "avg_annual_savings_usd": 2160.0,
+    "top_building_score": 70.1
+  },
+  "AZ": {
+    "state": "AZ",
+    "market_readiness_score": 40.6,
+    "top_drivers": [
+      "Drought & water scarcity pressure"
+    ],
+    "candidate_count": 2003,
+    "avg_roof_area_sqft": 199965,
+    "pct_cooling_tower": 0.053,
+    "avg_annual_rainfall_in": 9.9,
+    "avg_annual_savings_usd": 674.0,
+    "top_building_score": 60.3
+  },
+  "PA": {
+    "state": "PA",
+    "market_readiness_score": 37.8,
+    "top_drivers": [
+      "High water utility costs",
+      "Strong regulatory / incentive environment"
+    ],
+    "candidate_count": 5337,
+    "avg_roof_area_sqft": 205711,
+    "pct_cooling_tower": 0.01,
+    "avg_annual_rainfall_in": 43.5,
+    "avg_annual_savings_usd": 5238.0,
+    "top_building_score": 71.7
+  }
+}
