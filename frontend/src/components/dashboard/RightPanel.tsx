@@ -33,9 +33,9 @@ export default function RightPanel(props: RightPanelProps) {
   if (selection.mapMode === "national") {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center px-6 bg-gray-950">
-        <div className="text-gray-600 text-3xl mb-3">↗</div>
-        <p className="text-sm font-semibold text-gray-300 mb-1">Click any state to begin</p>
-        <p className="text-xs text-gray-600 leading-relaxed">
+        <div className="text-gray-400 text-3xl mb-3">↗</div>
+        <p className="text-[15px] font-semibold text-white mb-2">Click any state to begin</p>
+        <p className="text-[13px] text-gray-400 leading-relaxed">
           States are scored by market readiness. Select one to view metrics and top metros.
         </p>
       </div>

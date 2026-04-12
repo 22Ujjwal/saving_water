@@ -55,7 +55,7 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
     <div className="space-y-3">
       {/* Header card */}
       <div className="rounded-lg bg-gray-900 border border-gray-700/50 p-4">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">State</p>
+        <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-1">State</p>
         <div className="flex items-start justify-between gap-2">
           <h2 className="text-lg font-bold text-white leading-tight">{s.state}</h2>
           <div className="text-right shrink-0">
@@ -66,7 +66,7 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
 
         {s.top_drivers.length > 0 && (
           <div className="mt-3">
-            <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1.5">Top Drivers</p>
+            <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-1.5">Top Drivers</p>
             <div className="flex flex-wrap gap-1.5">
               {s.top_drivers.map((d, i) => (
                 <span
@@ -84,7 +84,7 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
       {/* Score breakdown bars */}
       {s.score_breakdown && (
         <div className="rounded-lg bg-gray-900 border border-gray-700/50 p-4">
-          <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-3">Score Breakdown</p>
+          <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-3">Score Breakdown</p>
           <div className="space-y-2.5">
             {Object.entries(s.score_breakdown).map(([key, val]) => {
               if (val === undefined) return null;
@@ -92,8 +92,8 @@ export default function StateSummaryPanel({ selection, stateScores }: Props) {
               return (
                 <div key={key}>
                   <div className="flex justify-between mb-1">
-                    <span className="text-[11px] text-gray-400">{BREAKDOWN_LABELS[key] ?? key}</span>
-                    <span className="text-[11px] font-bold text-white">{val}</span>
+                    <span className="text-xs text-gray-300">{BREAKDOWN_LABELS[key] ?? key}</span>
+                    <span className="text-xs font-bold text-white">{val}</span>
                   </div>
                   <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${barColor(pct)}`} style={{ width: `${pct}%` }} />

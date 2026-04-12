@@ -30,37 +30,37 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
     <div className="flex flex-col h-full bg-gray-950 text-white overflow-y-auto">
 
       {/* Logo */}
-      <div className="px-4 py-4 border-b border-gray-800">
-        <h1 className="text-base font-bold tracking-tight text-white leading-none">RainUSE Nexus</h1>
-        <p className="text-[11px] text-gray-500 mt-0.5">Prospecting Engine</p>
+      <div className="px-5 py-5 border-b border-white/8">
+        <h1 className="text-[16px] font-bold tracking-tight text-white leading-none">RainUSE Nexus</h1>
+        <p className="text-[12px] text-gray-400 mt-1.5 font-normal">Prospecting Engine</p>
       </div>
 
       {/* Current view + back button */}
-      <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1.5 font-semibold">View</p>
+      <div className="px-5 py-4 border-b border-white/8">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-2 font-semibold">View</p>
         <div className="flex items-center gap-2">
           {parentAction && (
             <button
               onClick={parentAction}
-              className="flex items-center gap-0.5 text-gray-400 hover:text-white transition-colors text-xs"
+              className="flex items-center gap-0.5 text-gray-400 hover:text-white transition-colors"
             >
-              <ChevronLeft size={13} />
+              <ChevronLeft size={14} />
             </button>
           )}
-          <span className="text-sm font-semibold text-white">{VIEW_LABELS[selection.mapMode]}</span>
+          <span className="text-[14px] font-semibold text-white">{VIEW_LABELS[selection.mapMode]}</span>
         </div>
       </div>
 
       {/* Scope breadcrumb */}
-      <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-2 font-semibold">Scope</p>
+      <div className="px-5 py-4 border-b border-white/8">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-2.5 font-semibold">Scope</p>
         <div className="space-y-0.5">
           <button
             onClick={goNational}
-            className={`w-full text-left text-xs px-2 py-1.5 rounded transition-colors ${
+            className={`w-full text-left text-[13px] font-medium px-2.5 py-2 rounded-md transition-colors ${
               selection.mapMode === "national"
-                ? "bg-gray-700 text-white font-semibold"
-                : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                ? "bg-white/10 text-white"
+                : "text-gray-300 hover:text-white hover:bg-white/5"
             }`}
           >
             National
@@ -69,13 +69,13 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
           {selection.selectedState && (
             <button
               onClick={goState}
-              className={`w-full text-left text-xs px-2 py-1.5 rounded transition-colors flex items-center gap-1 ${
+              className={`w-full text-left text-[13px] font-medium px-2.5 py-2 rounded-md transition-colors flex items-center gap-1.5 ${
                 selection.mapMode === "state"
-                  ? "bg-gray-700 text-white font-semibold"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-300 hover:text-white hover:bg-white/5"
               }`}
             >
-              <ChevronLeft size={10} className="text-gray-600 shrink-0" />
+              <ChevronLeft size={12} className="text-gray-500 shrink-0" />
               State: {selection.selectedState}
             </button>
           )}
@@ -83,13 +83,13 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
           {selection.selectedMetro && (
             <button
               onClick={goMetro}
-              className={`w-full text-left text-xs px-2 py-1.5 rounded transition-colors flex items-center gap-1 ${
+              className={`w-full text-left text-[13px] font-medium px-2.5 py-2 rounded-md transition-colors flex items-center gap-1.5 ${
                 selection.mapMode === "metro"
-                  ? "bg-gray-700 text-white font-semibold"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-300 hover:text-white hover:bg-white/5"
               }`}
             >
-              <ChevronLeft size={10} className="text-gray-600 shrink-0" />
+              <ChevronLeft size={12} className="text-gray-500 shrink-0" />
               Metro selected
             </button>
           )}
@@ -97,13 +97,13 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
           {selection.selectedBuildingId && (
             <button
               onClick={() => setSelection(prev => ({ ...prev, mapMode: "building" }))}
-              className={`w-full text-left text-xs px-2 py-1.5 rounded transition-colors flex items-center gap-1 ${
+              className={`w-full text-left text-[13px] font-medium px-2.5 py-2 rounded-md transition-colors flex items-center gap-1.5 ${
                 selection.mapMode === "building"
-                  ? "bg-gray-700 text-white font-semibold"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-300 hover:text-white hover:bg-white/5"
               }`}
             >
-              <ChevronLeft size={10} className="text-gray-600 shrink-0" />
+              <ChevronLeft size={12} className="text-gray-500 shrink-0" />
               Building
             </button>
           )}
@@ -111,10 +111,10 @@ export default function LeftPanel({ selection, setSelection }: LeftPanelProps) {
       </div>
 
       {/* Filters */}
-      <div className="px-4 py-3 flex-1">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-3 font-semibold">Filters</p>
+      <div className="px-5 py-4 flex-1">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-3 font-semibold">Filters</p>
         {selection.mapMode === "national" ? (
-          <p className="text-xs text-gray-600 leading-relaxed">
+          <p className="text-[13px] text-gray-400 leading-[1.6]">
             Select a state to activate building filters.
           </p>
         ) : (

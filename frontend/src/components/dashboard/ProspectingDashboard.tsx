@@ -166,7 +166,7 @@ export default function ProspectingDashboard() {
   return (
     <div className="flex h-screen w-full bg-gray-950 text-white overflow-hidden">
       {/* Left Panel */}
-      <div className="w-56 h-full border-r border-gray-800 flex flex-col shrink-0 z-10 hidden md:flex">
+      <div className="w-64 h-full border-r border-white/8 flex flex-col shrink-0 z-10 hidden md:flex">
         <LeftPanel selection={selection} setSelection={setSelection} />
       </div>
 

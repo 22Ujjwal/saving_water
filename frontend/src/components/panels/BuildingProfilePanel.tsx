@@ -42,8 +42,8 @@ function fmtGal(n: number): string {
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-800/60 last:border-0">
-      <span className="text-[11px] text-gray-500">{label}</span>
-      <span className="text-[11px] font-semibold text-white">{value}</span>
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-xs font-semibold text-white">{value}</span>
     </div>
   );
 }
@@ -66,20 +66,20 @@ export default function BuildingProfilePanel({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="text-base font-bold text-white truncate">{building.address.split(",")[0]}</h2>
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-[13px] text-gray-400 mt-0.5 truncate">
               {building.metro}, {building.state} • {building.building_type.replace(/_/g, " ")}
             </p>
           </div>
           <div className="shrink-0 text-right">
             <div className="text-2xl font-black text-white leading-none">{building.viability_score}</div>
-            <div className="text-[9px] uppercase tracking-widest text-gray-500 font-semibold">Viability</div>
+            <div className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">Viability</div>
           </div>
         </div>
 
         {/* Detection confidence + angle */}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <div className="flex items-center gap-1.5 bg-gray-800 rounded-md px-2.5 py-1">
-            <span className="text-[10px] text-gray-500 font-medium">Detection confidence:</span>
+            <span className="text-xs text-gray-400 font-medium">Detection confidence:</span>
             <span className={`text-xs font-black ${cvColor}`}>{cvPct}%</span>
           </div>
           <span className={`text-[10px] font-semibold px-2 py-1 rounded border ${angle.badge}`}>
@@ -90,7 +90,7 @@ export default function BuildingProfilePanel({
 
       {/* ── Agency Drivers ─────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-2">Agency Drivers</p>
+        <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-2">Agency Drivers</p>
         <ul className="space-y-1">
           {building.urgency_drivers.map((d, i) => (
             <li key={i} className={`text-xs font-medium flex items-start gap-1.5 ${DRIVER_COLORS[i % DRIVER_COLORS.length]}`}>
@@ -103,7 +103,7 @@ export default function BuildingProfilePanel({
 
       {/* ── Physical ───────────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">Physical</p>
+        <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-1">Physical</p>
         <MetricRow label="Roof Area"        value={`${(building.roof_area_sqft / 1000).toFixed(0)}K sqft`} />
         <MetricRow label="Annual Rainfall"  value={`${building.annual_rainfall_in}"`} />
         <MetricRow label="Harvestable"      value={fmtGal(building.harvestable_gal_yr)} />
@@ -116,7 +116,7 @@ export default function BuildingProfilePanel({
 
       {/* ── Financial Snapshot ─────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-gray-800">
-        <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">Financial Snapshot</p>
+        <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-1">Financial Snapshot</p>
         <MetricRow label="Annual Water Savings"  value={fmtUsd(building.annual_water_savings_usd)} />
         <MetricRow label="Annual Sewer Savings"  value={fmtUsd(building.annual_sewer_savings_usd)} />
         <MetricRow label="Incentive Value"        value={fmtUsd(building.incentive_value_usd)} />

@@ -1,5 +1,6 @@
+
+
 import Link from "next/link";
-import { ArrowRight, Search, Menu } from "lucide-react";
 
 export default function Home() {
   return (
@@ -13,72 +14,37 @@ export default function Home() {
       <div className="flex-1 w-full max-w-7xl mx-auto rounded-3xl border border-white/5 bg-[#0e131f]/60 backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col relative z-10">
         
         {/* Top Navbar */}
-        <header className="flex items-center justify-between px-8 py-5 border-b border-white/5 bg-[#0a0f18]/40">
-          <div className="flex items-center space-x-12">
-            <div className="text-xl font-medium tracking-tight text-white flex items-center space-x-2">
-              <div className="w-6 h-6 rounded bg-blue-500 flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full" />
-              </div>
-              <span>RainUSE Nexus</span>
-            </div>
-            
-            <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-              <Link href="#" className="text-emerald-400 border-b-2 border-emerald-400 pb-1 -mb-[3px]">
-                Home
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors flex items-center gap-1">
-                <span className="text-emerald-400 text-lg leading-none">+</span> Methodology
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors flex items-center gap-1">
-                <span className="text-emerald-400 text-lg leading-none">+</span> Markets
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors">
-                Case Studies
-              </Link>
-            </nav>
+        <header className="flex items-center px-8 py-5 border-b border-white/5 bg-[#0a0f18]/40">
+          <div className="text-[22px] font-semibold tracking-tight text-white flex items-center space-x-2.5">
+            <img src="/icon.png" alt="RainUSE icon" className="w-8 h-8 object-contain" />
+            <span>RainUSE Nexus</span>
           </div>
-
-          <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-400">
-            <button className="hover:text-white transition-colors flex items-center gap-2">
-              <Search className="w-4 h-4" />
-              <span>Search</span>
-            </button>
-            <Link href="#" className="hover:text-white transition-colors">
-              Contact Us
-            </Link>
-            <div className="pl-6 border-l border-white/10">
-              <Link href="#" className="flex items-center gap-2 text-white hover:text-emerald-400 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                <span>ENTER PORTAL</span>
-              </Link>
-            </div>
-          </div>
-          <button className="md:hidden text-white">
-            <Menu className="w-6 h-6" />
-          </button>
         </header>
 
         {/* Hero Content aligned roughly to image proportions */}
         <div className="flex-1 flex flex-col md:flex-row relative">
           
           {/* Left Content Area */}
-          <div className="w-full md:w-[45%] flex flex-col justify-center px-10 py-12 md:pl-20 z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-[72px] font-semibold leading-[1.1] text-white mb-8 tracking-tight">
-              Prospecting<br />
-              for Water<br />
-              Independence
+          <div className="w-full md:w-[45%] flex flex-col justify-center px-10 py-12 md:pl-20 z-30">
+            {/* Eyebrow label */}
+            <div className="inline-flex items-center gap-2.5 mb-7">
+              <span className="w-5 h-px bg-emerald-400/70"></span>
+              <span className="text-emerald-400 text-xs font-medium tracking-[0.18em] uppercase">AI-Powered Water Intelligence</span>
+            </div>
+
+            <h1 className="text-[64px] md:text-[76px] lg:text-[92px] font-bold leading-[1.0] tracking-tight text-white mb-7">
+              Turn Buildings<br />
+              Into Water<br />
+              Assets
             </h1>
-            
-            <p className="text-slate-400 text-base max-w-md leading-relaxed mb-12 font-light">
-              Identify high-potential commercial buildings for rainwater and non-potable reuse. We're leading the charge to make real estate sustainable, mapping the intersection of high water costs, ESG mandates, and robust recapture potential.
+
+            <p className="text-slate-400 text-[17px] max-w-sm leading-[1.75] mb-9 font-normal">
+              Identify high-ROI water reuse opportunities using AI, satellite imagery, and real-world financial data.
             </p>
 
-            <button className="bg-white text-[#0a0f18] rounded-full px-8 py-3.5 text-sm font-semibold inline-flex items-center space-x-2 w-max hover:bg-slate-200 transition-colors">
-              <div className="w-2 h-2 rounded-full bg-blue-600" />
-              <span>LEARN MORE</span>
-            </button>
+            <Link href="/map" className="bg-white text-[#0a0f18] rounded-full px-8 py-3.5 text-sm font-semibold w-max hover:bg-emerald-400 transition-colors duration-200">
+              Get Started
+            </Link>
           </div>
 
           {/* Right Visual Area (Mimicking the 3D building render) */}
@@ -120,36 +86,11 @@ export default function Home() {
             </div>
             
             {/* Image placeholder / lighting overlay to unify the aesthetic */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0e131f]/90 via-[#0e131f]/40 to-transparent pointer-events-none z-20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0e131f] via-[#0e131f]/80 to-transparent pointer-events-none z-20" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0e131f] via-transparent to-transparent pointer-events-none z-20" />
           </div>
         </div>
 
-        {/* Bottom Call to Action Bar */}
-        <div className="w-full bg-[#151b2b]/95 backdrop-blur border-t border-white/5 py-4 px-8 mt-auto z-30">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-12 w-full md:w-auto">
-              <div>
-                <h3 className="text-white font-medium text-sm">Ready to explore non-potable reuse?</h3>
-              </div>
-              <p className="text-slate-400 text-sm max-w-md">
-                Launch the interactive map to identify properties, calculate ROI, and generate AI-driven investment briefs instantly.
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-4 w-full md:w-auto self-end md:self-auto">
-              <Link 
-                href="/map" 
-                className="flex items-center gap-3 text-sm font-medium text-white hover:text-emerald-400 transition-colors ml-auto md:ml-0 group"
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-emerald-400/50 group-hover:bg-emerald-400/10 transition-all">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-                <span>GET STARTED</span>
-              </Link>
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>

@@ -36,11 +36,11 @@ export default function FilterPanel({ selection, setSelection }: FilterPanelProp
           >
             <span className={`mt-0.5 w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-white/20 ${active ? meta.color : "bg-gray-700"}`} />
             <div className="min-w-0">
-              <div className={`text-xs font-medium leading-tight ${active ? "text-white" : "text-gray-400"}`}>
+              <div className={`text-[13px] font-medium leading-tight ${active ? "text-white" : "text-gray-300"}`}>
                 {meta.label}
               </div>
               {active && meta.sub && (
-                <div className="text-[10px] text-gray-500 mt-0.5 truncate">{meta.sub}</div>
+                <div className="text-xs text-gray-400 mt-0.5 truncate">{meta.sub}</div>
               )}
             </div>
           </button>

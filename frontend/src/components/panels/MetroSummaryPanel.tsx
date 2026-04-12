@@ -25,7 +25,7 @@ export default function MetroSummaryPanel({ selection, setSelection, stateScores
 
   return (
     <div className="rounded-lg bg-gray-900 border border-gray-700/50 p-4">
-      <p className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-3">Metric Markets</p>
+      <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium mb-3">Metric Markets</p>
       <div className="space-y-1.5">
         {metros.map((m) => (
           <button
@@ -38,7 +38,7 @@ export default function MetroSummaryPanel({ selection, setSelection, stateScores
                 {m.metro.split(",")[0]}
               </div>
               {m.top_drivers.length > 0 && (
-                <div className="text-[10px] text-gray-500 truncate mt-0.5">
+                <div className="text-xs text-gray-400 truncate mt-0.5">
                   {m.top_drivers.join(" · ")}
                 </div>
               )}
