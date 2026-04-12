@@ -234,6 +234,25 @@ export default function ProspectingMap() {
             const abbr = STATE_ABBR[name]
             if (!abbr) return
             setSelectedState(abbr)
+
+            // Zoom to state immediately — m is live here, no race condition
+            const score = stateScores.current.find((s) => s.state_id === abbr)
+            if (score?.metros.length) {
+              const bounds = score.metros.reduce(
+                (acc, metro) => {
+                  acc[0] = Math.min(acc[0], metro.lng)
+                  acc[1] = Math.min(acc[1], metro.lat)
+                  acc[2] = Math.max(acc[2], metro.lng)
+                  acc[3] = Math.max(acc[3], metro.lat)
+                  return acc
+                },
+                [Infinity, Infinity, -Infinity, -Infinity]
+              )
+              m.fitBounds(
+                [[bounds[0] - 2, bounds[1] - 1.5], [bounds[2] + 2, bounds[3] + 1.5]],
+                { duration: 900, padding: 80 }
+              )
+            }
           })
         })
         .catch(console.error)
@@ -376,13 +395,11 @@ export default function ProspectingMap() {
       normal,
     ] as maplibregl.ExpressionSpecification
 
-    if (mapMode === 'building') {
-      m.setPaintProperty('states-fill', 'fill-opacity', 0)
-    } else if (mapMode === 'metro') {
-      m.setPaintProperty('states-fill', 'fill-opacity', overlayOpacity(0.3, 0.18))
-    } else {
-      // national or state — full overlay over satellite
+    if (mapMode === 'national') {
       m.setPaintProperty('states-fill', 'fill-opacity', overlayOpacity(0.7, 0.5))
+    } else {
+      // state / metro / building — hide choropleth, show pure satellite
+      m.setPaintProperty('states-fill', 'fill-opacity', 0)
     }
   }, [mapMode])
 
@@ -414,23 +431,6 @@ export default function ProspectingMap() {
         features: metroFeatures,
       })
 
-      // Fly to state bounding box (rough)
-      const bounds = score.metros.reduce(
-        (acc, metro) => {
-          acc[0] = Math.min(acc[0], metro.lng)
-          acc[1] = Math.min(acc[1], metro.lat)
-          acc[2] = Math.max(acc[2], metro.lng)
-          acc[3] = Math.max(acc[3], metro.lat)
-          return acc
-        },
-        [Infinity, Infinity, -Infinity, -Infinity]
-      )
-      if (bounds[0] !== Infinity) {
-        m.fitBounds(
-          [[bounds[0] - 2, bounds[1] - 1.5], [bounds[2] + 2, bounds[3] + 1.5]],
-          { duration: 1000, padding: 80 }
-        )
-      }
     } else {
       // Clear metros + buildings
       ;(m.getSource('metros') as maplibregl.GeoJSONSource | undefined)?.setData({
