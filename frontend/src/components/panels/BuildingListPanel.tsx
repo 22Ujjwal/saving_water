@@ -1,6 +1,7 @@
 import React from "react";
 import { SelectionState } from "../dashboard/ProspectingDashboard";
 import { BuildingCandidate } from "@/types/building";
+import { buildingLabel } from "@/lib/utils";
 
 type Props = {
   selection: SelectionState;
@@ -39,7 +40,7 @@ export default function BuildingListPanel({ selection, setSelection, filteredBui
             >
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <span className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
-                  {b.address.split(",")[0]}
+                  {buildingLabel(b).split(",")[0]}
                 </span>
                 <span className="text-xs font-black text-emerald-400 shrink-0">{b.viability_score}</span>
               </div>

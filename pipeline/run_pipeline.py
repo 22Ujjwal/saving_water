@@ -107,9 +107,23 @@ def main():
         run_07()
 
     from config import BUILDINGS_JSON, STATE_SCORES_JSON
+    import shutil
+
+    # Sync output to frontend and backend data directories
+    repo_root = Path(__file__).parent.parent
+    sync_targets = [
+        repo_root / "frontend" / "public" / "data",
+        repo_root / "backend" / "data",
+    ]
+    for target_dir in sync_targets:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy(BUILDINGS_JSON, target_dir / "buildings.json")
+        shutil.copy(STATE_SCORES_JSON, target_dir / "state_scores.json")
+        log.info(f"Synced output → {target_dir}")
+
     log.info("=" * 60)
     log.info("Pipeline complete!")
-    log.info(f"  buildings.json   → {BUILDINGS_JSON}")
+    log.info(f"  buildings.json    → {BUILDINGS_JSON}")
     log.info(f"  state_scores.json → {STATE_SCORES_JSON}")
     log.info("=" * 60)
 

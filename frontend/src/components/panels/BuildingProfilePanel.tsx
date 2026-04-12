@@ -2,6 +2,7 @@ import React from "react";
 import { SelectionState } from "../dashboard/ProspectingDashboard";
 import CvEvidencePanel from "./CvEvidencePanel";
 import { BuildingCandidate } from "@/types/building";
+import { buildingLabel } from "@/lib/utils";
 
 type Props = {
   selection: SelectionState;
@@ -65,7 +66,7 @@ export default function BuildingProfilePanel({
       <div className="px-4 pt-4 pb-3 border-b border-gray-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-base font-bold text-white truncate">{building.address.split(",")[0]}</h2>
+            <h2 className="text-base font-bold text-white truncate">{buildingLabel(building)}</h2>
             <p className="text-xs text-gray-500 mt-0.5 truncate">
               {building.metro}, {building.state} • {building.building_type.replace(/_/g, " ")}
             </p>

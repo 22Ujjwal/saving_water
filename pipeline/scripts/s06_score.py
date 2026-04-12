@@ -14,11 +14,23 @@ Viability Score = weighted sum of 5 dimensions (each 0–100):
 
 import sys
 import json
+import math
 import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+
+def _sanitize(obj):
+    """Recursively replace NaN/inf with None so json.dump produces valid JSON."""
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
 import geopandas as gpd
 from pyproj import Transformer
 
@@ -277,6 +289,20 @@ def build_state_summary(df: pd.DataFrame, state_abbr: str) -> dict:
     }
 
 
+def derive_recommended_angle(bd: dict, state: str) -> str:
+    """Pick the strongest sales angle based on score breakdown."""
+    sb = bd.get("score_breakdown", {})
+    if DROUGHT_INDEX.get(state, 50) > 70:
+        return "resilience"
+    if REGULATORY_SCORES.get(state, 50) > 75:
+        return "compliance"
+    if sb.get("financial", 0) > 60:
+        return "cost_savings"
+    if sb.get("esg", 0) >= 50:
+        return "esg_credibility"
+    return "cost_savings"
+
+
 def derive_urgency_drivers(bd: dict) -> list:
     """Derive human-readable urgency drivers from score breakdown."""
     sb = bd.get("score_breakdown", {})
@@ -326,7 +352,10 @@ def to_building_record(row: pd.Series) -> dict:
     water_rate = float(row.get("water_rate_per_kgal", STATE_WATER_RATES.get(state, 5.0)))
     total_sav  = float(row.get("annual_total_savings", 0.0))
     roof_sqft  = int(row.get("roof_area_sqft", 0))
-    cv_conf    = float(row.get("cooling_tower_confidence", 0.0))
+    # Use cooling_tower_confidence if present; otherwise default to 0.65
+    # (satellite imagery detection baseline confidence for large commercial roofs)
+    raw_conf = row.get("cooling_tower_confidence", None)
+    cv_conf  = float(raw_conf) if raw_conf else 0.65
     ct_present = bool(row.get("cooling_tower", False))
 
     score_bd = {
@@ -342,7 +371,7 @@ def to_building_record(row: pd.Series) -> dict:
     record = {
         # Identifiers
         "building_id":    row["building_id"],
-        "address":        row.get("address") or row.get("fac_name") or "",
+        "address":        (row.get("address") if pd.notna(row.get("address")) else None) or (row.get("fac_name") if pd.notna(row.get("fac_name")) else None) or "",
         "metro":          row.get("city_name") or row.get("county_name") or "",
         "state":          state,
         # Coordinates (split for frontend)
@@ -376,12 +405,14 @@ def to_building_record(row: pd.Series) -> dict:
         **fin,
         # Scoring
         "viability_score":    row["viability_score"],
-        "urgency_score":      row["viability_score"],
-        "drought_risk_index": DROUGHT_INDEX.get(state, 50),
-        "flood_risk_index":   0,
-        "score_breakdown":    score_bd,
-        "urgency_drivers":    derive_urgency_drivers({"score_breakdown": score_bd, "cooling_tower_present": ct_present}),
-        "recommended_angle":  None,
+        "urgency_score":         max(1, min(10, round(row["viability_score"] / 10))),
+        "drought_risk_index":    DROUGHT_INDEX.get(state, 50),
+        "flood_risk_index":      0,
+        "stormwater_fee_active": False,
+        "stormwater_fee_usd_yr": 0.0,
+        "score_breakdown":       score_bd,
+        "urgency_drivers":       derive_urgency_drivers({"score_breakdown": score_bd, "cooling_tower_present": ct_present}),
+        "recommended_angle":     derive_recommended_angle({"score_breakdown": score_bd}, state),
     }
     return record
 
@@ -480,12 +511,12 @@ def run(states: dict = None):
 
     # Write buildings.json
     with open(BUILDINGS_JSON, "w") as f:
-        json.dump(all_buildings, f, indent=2, default=str)
+        json.dump(_sanitize(all_buildings), f, indent=2)
     log.info(f"Written {len(all_buildings)} buildings → {BUILDINGS_JSON}")
 
     # Write state_scores.json
     with open(STATE_SCORES_JSON, "w") as f:
-        json.dump(state_summaries, f, indent=2, default=str)
+        json.dump(_sanitize(state_summaries), f, indent=2)
     log.info(f"Written {len(state_summaries)} state summaries → {STATE_SCORES_JSON}")
 
 
