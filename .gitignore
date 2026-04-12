@@ -1,6 +1,12 @@
 CLAUDE.md
 context.md
+GEMINI.md
+LICENSE
 .env
+__pycache__/
+*.py[cod]
+*$py.class
+
 
 # frontend testing
 frontend/coverage
