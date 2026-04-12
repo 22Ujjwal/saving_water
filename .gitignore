@@ -28,9 +28,20 @@ pipeline/data/processed/
 *.zip
 *.geojson
 
+# ── Pipeline output (needed to run the app) ────────────────────────────────────
+!pipeline/output/
+!pipeline/output/**
+
 # ── macOS ──────────────────────────────────────────────────────────────────────
 .DS_Store
 **/.DS_Store
+
+# ── Editor & runtime artifacts ─────────────────────────────────────────────────
+*.swp
+*.swo
+message.txt
+backend/data/brief_cache.json
+frontend/tsconfig.tsbuildinfo
 
 # ── Frontend — Next.js ─────────────────────────────────────────────────────────
 frontend/.next/
