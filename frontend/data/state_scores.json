@@ -1,0 +1,136 @@
+[
+  {
+    "state_id": "CA",
+    "state_name": "California",
+    "market_readiness_score": 94,
+    "top_drivers": ["Extreme water cost pressure", "Severe drought risk", "Strong regulatory push"],
+    "score_breakdown": {
+      "water_cost_pressure": 95,
+      "rainfall_availability": 62,
+      "building_density": 91,
+      "regulatory_friendliness": 88,
+      "drought_resilience_pressure": 98
+    },
+    "metros": [
+      { "metro_id": "ca-los-angeles", "metro_name": "Los Angeles", "score": 96, "lat": 34.0522, "lng": -118.2437, "top_drivers": ["Tier-4 water pricing", "SBTi commitments", "AB 2404 compliance deadline"] },
+      { "metro_id": "ca-san-francisco", "metro_name": "San Francisco Bay Area", "score": 91, "lat": 37.7749, "lng": -122.4194, "top_drivers": ["LEED portfolio density", "Water restriction active", "ESG investor pressure"] },
+      { "metro_id": "ca-san-diego", "metro_name": "San Diego", "score": 88, "lat": 32.7157, "lng": -117.1611, "top_drivers": ["High sewer rates", "Stormwater fee active", "Net-zero pledges"] }
+    ]
+  },
+  {
+    "state_id": "TX",
+    "state_name": "Texas",
+    "market_readiness_score": 87,
+    "top_drivers": ["Rapid industrial growth", "High water stress in west", "Minimal regulation friction"],
+    "score_breakdown": {
+      "water_cost_pressure": 82,
+      "rainfall_availability": 55,
+      "building_density": 89,
+      "regulatory_friendliness": 91,
+      "drought_resilience_pressure": 86
+    },
+    "metros": [
+      { "metro_id": "tx-dallas", "metro_name": "Dallas–Fort Worth", "score": 89, "lat": 32.7767, "lng": -96.7970, "top_drivers": ["Industrial corridor density", "State incentive active", "Fast permit pathway"] },
+      { "metro_id": "tx-houston", "metro_name": "Houston", "score": 85, "lat": 29.7604, "lng": -95.3698, "top_drivers": ["Petrochemical campus roofs", "High sewer surcharge", "Flood risk offset demand"] },
+      { "metro_id": "tx-austin", "metro_name": "Austin", "score": 83, "lat": 30.2672, "lng": -97.7431, "top_drivers": ["Tech campus ESG mandates", "Active incentive program", "Growing water stress"] }
+    ]
+  },
+  {
+    "state_id": "AZ",
+    "state_name": "Arizona",
+    "market_readiness_score": 91,
+    "top_drivers": ["Critical drought basin", "Highest water stress tier", "Utility incentives active"],
+    "score_breakdown": {
+      "water_cost_pressure": 93,
+      "rainfall_availability": 41,
+      "building_density": 78,
+      "regulatory_friendliness": 85,
+      "drought_resilience_pressure": 97
+    },
+    "metros": [
+      { "metro_id": "az-phoenix", "metro_name": "Phoenix", "score": 93, "lat": 33.4484, "lng": -112.0740, "top_drivers": ["Colorado River allocation cuts", "Data center water demand", "Utility rebate program"] },
+      { "metro_id": "az-tucson", "metro_name": "Tucson", "score": 86, "lat": 32.2226, "lng": -110.9747, "top_drivers": ["Groundwater management area", "Extreme drought index", "Commercial density growing"] }
+    ]
+  },
+  {
+    "state_id": "FL",
+    "state_name": "Florida",
+    "market_readiness_score": 79,
+    "top_drivers": ["High rainfall availability", "Active stormwater programs", "ESG-driven REITs"],
+    "score_breakdown": {
+      "water_cost_pressure": 71,
+      "rainfall_availability": 88,
+      "building_density": 82,
+      "regulatory_friendliness": 76,
+      "drought_resilience_pressure": 68
+    },
+    "metros": [
+      { "metro_id": "fl-miami", "metro_name": "Miami", "score": 81, "lat": 25.7617, "lng": -80.1918, "top_drivers": ["Sea level / flood risk narrative", "LEED density high", "SEC water risk disclosures"] },
+      { "metro_id": "fl-tampa", "metro_name": "Tampa Bay", "score": 76, "lat": 27.9506, "lng": -82.4572, "top_drivers": ["Industrial roof footprint", "Stormwater fee active", "Incentive program live"] }
+    ]
+  },
+  {
+    "state_id": "NY",
+    "state_name": "New York",
+    "market_readiness_score": 76,
+    "top_drivers": ["Dense commercial stock", "ESG reporting mandates", "High sewer rates"],
+    "score_breakdown": {
+      "water_cost_pressure": 78,
+      "rainfall_availability": 74,
+      "building_density": 95,
+      "regulatory_friendliness": 62,
+      "drought_resilience_pressure": 58
+    },
+    "metros": [
+      { "metro_id": "ny-new-york", "metro_name": "New York City", "score": 78, "lat": 40.7128, "lng": -74.0060, "top_drivers": ["Local Law 97 pressure", "Industrial flat-roof stock", "ESG investor mandates"] }
+    ]
+  },
+  {
+    "state_id": "NV",
+    "state_name": "Nevada",
+    "market_readiness_score": 88,
+    "top_drivers": ["Hyper-arid basin", "Data center boom", "Southern Nevada Water Authority mandates"],
+    "score_breakdown": {
+      "water_cost_pressure": 91,
+      "rainfall_availability": 32,
+      "building_density": 72,
+      "regulatory_friendliness": 83,
+      "drought_resilience_pressure": 96
+    },
+    "metros": [
+      { "metro_id": "nv-las-vegas", "metro_name": "Las Vegas", "score": 90, "lat": 36.1699, "lng": -115.1398, "top_drivers": ["Turf removal mandates", "High data center density", "SNWA compliance pressure"] }
+    ]
+  },
+  {
+    "state_id": "CO",
+    "state_name": "Colorado",
+    "market_readiness_score": 82,
+    "top_drivers": ["Snowpack-dependent supply", "Growing tech campuses", "Proactive utility incentives"],
+    "score_breakdown": {
+      "water_cost_pressure": 79,
+      "rainfall_availability": 58,
+      "building_density": 74,
+      "regulatory_friendliness": 87,
+      "drought_resilience_pressure": 88
+    },
+    "metros": [
+      { "metro_id": "co-denver", "metro_name": "Denver", "score": 84, "lat": 39.7392, "lng": -104.9903, "top_drivers": ["Snowpack supply uncertainty", "Industrial rooftop density", "Active rebate program"] }
+    ]
+  },
+  {
+    "state_id": "GA",
+    "state_name": "Georgia",
+    "market_readiness_score": 72,
+    "top_drivers": ["Logistics hub growth", "Incentive program active", "Moderate water stress"],
+    "score_breakdown": {
+      "water_cost_pressure": 68,
+      "rainfall_availability": 79,
+      "building_density": 76,
+      "regulatory_friendliness": 74,
+      "drought_resilience_pressure": 65
+    },
+    "metros": [
+      { "metro_id": "ga-atlanta", "metro_name": "Atlanta", "score": 74, "lat": 33.7490, "lng": -84.3880, "top_drivers": ["Warehouse belt rooftops", "Incentive program", "ESG-committed tenants"] }
+    ]
+  }
+]
