@@ -1,6 +1,7 @@
 # main.py
 import json
 import logging
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -8,29 +9,41 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
-from models import (
-    BuildingRecord, ROIRequest, ROIResponse,
-    RoiCalculateResponse, BriefRequest, BriefGenerateRequest, BriefResponse,
-)
+from models import BuildingRecord, ROIRequest, ROIResponse, BriefRequest, BriefResponse
 from roi_engine import calc_scenario
 from brief_generator import generate_brief
 
 load_dotenv()
+
 logger = logging.getLogger(__name__)
+
 app = FastAPI(title="RainUSE Nexus API")
 
+# CORS_ORIGINS env var overrides the default (comma-separated for multiple origins)
+_cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Load once at startup — never mutate
+# Drop real buildings.json into data/ to override the stub automatically
 _data_file = Path("data/buildings.json") if Path("data/buildings.json").exists() else Path("data/buildings_stub.json")
+logger.info("Loading buildings from %s", _data_file.resolve())
 _raw = json.loads(_data_file.read_text())
-BUILDINGS: dict[str, BuildingRecord] = {
-    b["building_id"]: BuildingRecord(**b) for b in _raw
-}
+
+BUILDINGS: dict[str, BuildingRecord] = {}
+_skipped = 0
+for _b in _raw:
+    try:
+        BUILDINGS[_b["building_id"]] = BuildingRecord(**_b)
+    except Exception as _e:
+        _skipped += 1
+        logger.warning("Skipped building %s — validation error: %s", _b.get("building_id", "?"), _e)
+
+logger.info("Loaded %d buildings (%d skipped)", len(BUILDINGS), _skipped)
 
 
 def get_building(building_id: str) -> BuildingRecord:
@@ -58,21 +71,6 @@ def calculate_roi(req: ROIRequest):
     return ROIResponse(building_id=req.building_id, scenario=req.scenario, **result)
 
 
-@app.post("/roi/calculate", response_model=RoiCalculateResponse)
-def calculate_roi_from_building(building: BuildingRecord):
-    roi = calc_scenario(building, "base")
-    return RoiCalculateResponse(
-        annual_harvestable_gal=roi["harvestable_gal"],
-        annual_water_savings_usd=roi["annual_water_savings_usd"],
-        annual_sewer_savings_usd=roi["annual_sewer_savings_usd"],
-        capex_range=building.system_capex_range,
-        payback_yrs=roi["simple_payback_yrs"],
-        npv_10yr_usd=roi["npv_10yr_usd"],
-        base_roi_percent=roi["base_roi_pct"],
-        confidence_adj_roi_percent=roi["confidence_adj_roi_pct"],
-    )
-
-
 @app.post("/brief", response_model=BriefResponse)
 def generate_investment_brief(req: BriefRequest):
     building = get_building(req.building_id)
@@ -84,20 +82,9 @@ def generate_investment_brief(req: BriefRequest):
         logger.error("BriefResponse validation failed for %s: %s", req.building_id, str(e))
         raise HTTPException(status_code=422, detail=f"Brief schema validation failed: {str(e)}")
     except Exception as e:
-        logger.error("Brief generation failed for %s: %s", req.building_id, str(e))
-        raise HTTPException(status_code=500, detail=f"Brief generation failed: {str(e)}")
-
-
-@app.post("/brief/generate", response_model=BriefResponse)
-def generate_brief_from_building(req: BriefGenerateRequest):
-    building = req.building
-    roi_data = calc_scenario(building, "base")
-    roi = ROIResponse(building_id=building.building_id, scenario="base", **roi_data)
-    try:
-        return generate_brief(building, roi)
-    except ValidationError as e:
-        logger.error("BriefResponse validation failed for %s: %s", building.building_id, str(e))
-        raise HTTPException(status_code=422, detail=f"Brief schema validation failed: {str(e)}")
-    except Exception as e:
-        logger.error("Brief generation failed for %s: %s", building.building_id, str(e))
-        raise HTTPException(status_code=500, detail=f"Brief generation failed: {str(e)}")
+        err_str = str(e)
+        logger.error("Brief generation failed for %s: %s", req.building_id, err_str)
+        # Propagate Gemini 503 as a 503 so the frontend can show a targeted message
+        if "503" in err_str or "UNAVAILABLE" in err_str:
+            raise HTTPException(status_code=503, detail="AI model temporarily unavailable — high demand. Please retry in a moment.")
+        raise HTTPException(status_code=500, detail=f"Brief generation failed: {err_str}")

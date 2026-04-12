@@ -1,7 +1,6 @@
 import React from "react";
 import { SelectionState } from "../dashboard/ProspectingDashboard";
 import { BuildingCandidate } from "@/types/building";
-import { buildingLabel } from "@/lib/utils";
 
 type Props = {
   selection: SelectionState;
@@ -21,36 +20,36 @@ export default function BuildingListPanel({ selection, setSelection, filteredBui
 
   return (
     <div className="flex flex-col h-full">
-      <div className="pb-3 border-b border-gray-800 mb-3">
+      <div className="pb-3 border-b border-slate-800 mb-3">
         <h2 className="text-sm font-bold text-white">{selection.selectedMetro?.split(",")[0]}</h2>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-slate-400 mt-0.5">
           {buildings.length} candidate{buildings.length !== 1 ? "s" : ""} match current filters
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1.5">
         {buildings.length === 0 ? (
-          <p className="text-xs text-gray-600 py-4 text-center">No buildings match active filters.</p>
+          <p className="text-xs text-slate-400 py-4 text-center">No buildings match active filters.</p>
         ) : (
           buildings.map((b) => (
             <button
               key={b.building_id}
               onClick={() => setSelection(prev => ({ ...prev, mapMode: "building", selectedBuildingId: b.building_id }))}
-              className="w-full text-left px-3 py-2.5 rounded-md bg-gray-900 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/80 transition-colors group"
+              className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-900/95 border border-slate-700/60 hover:border-slate-500/70 hover:bg-slate-900 transition-colors group"
             >
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <span className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
-                  {buildingLabel(b).split(",")[0]}
+                  {b.address?.trim() ? b.address.split(",")[0] : `${b.building_type.replace(/_/g, " ")} · ${b.metro}`}
                 </span>
                 <span className="text-xs font-black text-emerald-400 shrink-0">{b.viability_score}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] text-gray-500 capitalize truncate">
+                <span className="text-[10px] text-slate-300 capitalize truncate">
                   {b.building_type.replace(/_/g, " ")}
                 </span>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[10px] text-gray-500">CV {(b.cv_confidence_score * 100).toFixed(0)}%</span>
-                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${ANGLE_COLORS[b.recommended_angle]}`}>
+                  <span className="text-[10px] text-slate-300">CV {(b.cv_confidence_score * 100).toFixed(0)}%</span>
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${ANGLE_COLORS[b.recommended_angle] ?? ANGLE_COLORS["cost_savings"]}`}>
                     {b.recommended_angle.replace(/_/g, " ")}
                   </span>
                 </div>
