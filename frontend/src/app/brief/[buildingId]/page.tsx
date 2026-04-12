@@ -1,251 +1,369 @@
-import React from "react";
+"use client";
+
+import { use, useState, useEffect } from "react";
 import BriefHeader from "@/components/brief/BriefHeader";
 import SatellitePanel from "@/components/brief/SatellitePanel";
-import BriefReport, { BriefReportData } from "@/components/brief/BriefReport";
+import BriefReport, { type BriefReportData, type FinancialKpi } from "@/components/brief/BriefReport";
+import { fetchBuilding, fetchROI, fetchBrief } from "@/lib/api";
+import type { BuildingInfo, ROIResponse, BriefAPIResponse } from "@/types/roi";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-// Replace with fetchBuilding(buildingId) + generateBrief(buildingId) once
-// backend is wired. All values match the stub building in data/buildings.json.
+// ─── Adapter: map backend response → BriefReportData ─────────────────────────
 
-const MOCK_BUILDINGS: Record<string, {
-  address: string;
-  metro: string;
-  state: string;
-  buildingType: string;
-  ownerTenant?: string;
-  lat: number;
-  lng: number;
-  roofAreaSqft: number;
-  coolingTowerCount: number;
-  cvConfidencePct: number;
-  urgencyScore: number;
-  viabilityScore: number;
-  recommendedAngle: "cost_savings" | "resilience" | "compliance" | "esg_credibility";
-  imageryDate?: string;
-  imagerySource?: string;
-  imageryUrl?: string;
-}> = {
-  "bld_stub_001": {
-    address: "4500 N Loop 1604 W, San Antonio, TX 78249",
-    metro: "San Antonio",
-    state: "TX",
-    buildingType: "distribution_center",
-    ownerTenant: "Amazon",
-    lat: 29.5988,
-    lng: -98.6265,
-    roofAreaSqft: 420_000,
-    coolingTowerCount: 3,
-    cvConfidencePct: 81,
-    urgencyScore: 9,
-    viabilityScore: 88,
-    recommendedAngle: "cost_savings",
-    imageryDate: "Feb 2024",
-    imagerySource: "Sentinel-2 / Maxar",
-  },
-};
+function fmtUsd(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
+  return `$${n.toLocaleString()}`;
+}
 
-const MOCK_BRIEF: BriefReportData = {
-  generatedAt: "April 11, 2026",
-  buildingRef: "GRF-2026-TX-001",
-  analyst: "RainUSE Nexus AI Engine",
+function fmtGal(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M gal/yr`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K gal/yr`;
+  return `${n.toLocaleString()} gal/yr`;
+}
 
-  executiveSummary:
-    "The Amazon distribution center at 4500 N Loop 1604 W, San Antonio represents a high-confidence, high-urgency candidate for Grundfos rainwater reuse system deployment. With 420,000 sqft of harvestable roof surface, three active cooling towers, and Bexar County water costs escalating 18% year-over-year, the financial case is unusually strong. A base-case system delivers $68,400 in annual combined savings against a net CapEx of approximately $195,000 after incentives — yielding a simple payback of 2.9 years and a 10-year NPV exceeding $330,000. Amazon's public SBTi commitment and Net Zero 2040 pledge create procurement-level motivation beyond pure cost reduction. The CV confidence-adjusted ROI of 86.3% reflects satellite-derived uncertainty at 81% detection confidence; a single physical site survey is the most impactful next step to sharpen this number.",
+/** Parse an AI-generated assumptions string into a bullet list */
+function parseAssumptions(text: string): string[] {
+  const byLine = text
+    .split(/\n+/)
+    .map((l) => l.replace(/^[\d\-\*\.]+\s*/, "").trim())
+    .filter((l) => l.length > 15);
+  if (byLine.length > 1) return byLine.slice(0, 6);
+  return text
+    .split(/\.\s+/)
+    .filter((s) => s.length > 15)
+    .map((s) => (s.endsWith(".") ? s : `${s}.`))
+    .slice(0, 6);
+}
 
-  opportunityOverview: {
-    headline:
-      "A water-stressed mega-distribution center where financial urgency, physical suitability, and ESG obligation converge.",
-    bullets: [
-      "Bexar County water rates have risen 18% year-over-year — significantly above the national CPI, creating an immediate cost-reduction mandate for facility managers.",
-      "Three cooling towers detected at 81% CV confidence represent the dominant water consumption vector; rainwater blowdown substitution is the highest-leverage intervention.",
-      "The 420,000 sqft roof footprint yields approximately 7.94 million harvestable gallons per year under base-case assumptions — enough to offset a meaningful share of process water demand.",
-      "Active stormwater fee of $18,400/yr provides a direct avoidance line item that compresses payback independently of water/sewer savings.",
-      "Amazon's publicly filed SBTi commitment and water risk disclosures in its 10-K filing create institutional buying signals beyond the facilities team.",
-    ],
-    context:
-      "San Antonio sits within TWDB Region L, which projects a 21% gap between water supply and demand by 2040 under drought scenarios. Bexar County's water conservation incentive program (active) provides direct financial offset for qualified commercial rainwater reuse systems, reducing net CapEx and improving payback below the 3-year threshold that typically triggers Amazon sustainability capital approvals.",
-  },
+function toReportData(
+  brief: BriefAPIResponse,
+  building: BuildingInfo,
+  roi: ROIResponse
+): BriefReportData {
+  const cvPct = brief.confidence_caveats.cv_confidence_pct;
+  const capexLow  = building.system_capex_range?.[0] ?? Math.round(roi.capex_mid_usd * 0.82);
+  const capexHigh = building.system_capex_range?.[1] ?? Math.round(roi.capex_mid_usd * 1.18);
+  const incentiveAmort = Math.max(
+    0,
+    roi.total_annual_savings_usd
+      - roi.annual_water_savings_usd
+      - roi.annual_sewer_savings_usd
+      - roi.stormwater_fee_avoidance_usd
+  );
 
-  financialSnapshot: {
-    kpis: [
-      {
-        label: "Harvestable Gallons",
-        value: "7.94M gal/yr",
-        sub: "Base case, 30.4\" rainfall",
-      },
-      {
-        label: "Annual Savings",
-        value: "$68,400",
-        sub: "Water + sewer + stormwater",
-      },
-      {
-        label: "Simple Payback",
-        value: "2.9 yrs",
-        sub: "After incentives",
-      },
-      {
-        label: "10-yr NPV",
-        value: "$332,600",
-        sub: "5% discount rate",
-      },
-      {
-        label: "Base ROI",
-        value: "106.6%",
-        sub: "10-year horizon",
-      },
-      {
-        label: "Confidence-Adj ROI",
-        value: "86.3%",
-        sub: "Adjusted by 81% CV confidence",
-        highlight: true,
-      },
-      {
-        label: "CO₂ Offset",
-        value: "25.4 lbs×10³",
-        sub: "3.2 lbs per kgal avoided",
-      },
-      {
-        label: "CapEx Midpoint",
-        value: "$220,000",
-        sub: "$180K – $260K range",
-      },
-    ],
-    confidenceAdjRoiPct: 86.3,
-    cvConfidencePct: 81,
-    savingsBreakdown: [
-      { label: "Water savings",          usd: 33_348 },
-      { label: "Sewer savings",          usd: 21_130 },
-      { label: "Stormwater avoidance",   usd: 18_400 },
-      { label: "Incentive amortization", usd: 2_500  },
-    ],
-    capexRangeLow: 180_000,
-    capexRangeHigh: 260_000,
-    incentiveUsd: 25_000,
-  },
+  const kpis: FinancialKpi[] = [
+    { label: "Harvestable Gallons", value: fmtGal(brief.physical_suitability.annual_capture_gal), sub: "Annual capture, base efficiency" },
+    { label: "Annual Savings",      value: fmtUsd(roi.total_annual_savings_usd),                  sub: "Water + sewer + stormwater + incentive" },
+    { label: "Simple Payback",      value: `${roi.simple_payback_yrs.toFixed(1)} yrs`,            sub: "After available incentives" },
+    { label: "10-yr NPV",           value: fmtUsd(roi.npv_10yr_usd),                             sub: "5% discount rate" },
+    { label: "Base ROI",            value: `${roi.base_roi_pct.toFixed(1)}%`,                    sub: "10-year horizon" },
+    { label: "Confidence-Adj ROI",  value: `${roi.confidence_adj_roi_pct.toFixed(1)}%`,          sub: `Adjusted by ${cvPct}% CV confidence`, highlight: true },
+    { label: "CO₂ Offset",          value: `${(roi.co2_offset_lbs / 1000).toFixed(1)}K lbs/yr`, sub: "3.2 lbs per kgal avoided" },
+    { label: "CapEx Midpoint",      value: fmtUsd(roi.capex_mid_usd),                            sub: `Range: ${fmtUsd(capexLow)} – ${fmtUsd(capexHigh)}` },
+  ];
 
-  esgResilience: {
-    headline:
-      "Amazon's Net Zero 2040 pledge and water-risk SEC disclosures create a capital-approval pathway beyond the facilities team.",
-    bullets: [
-      "Amazon is publicly committed to Science Based Targets initiative (SBTi), requiring measurable water stewardship progress at the facility level — rainwater reuse is a direct qualifying intervention.",
-      "Bexar County's drought risk index of 4.2/10 is projected to increase to 6.5+ by 2035 under IPCC RCP 4.5 scenarios, elevating long-term operational water-access risk.",
-      "Amazon's 2023 10-K explicitly flags water availability as a material operational risk in water-stressed regions — this facility is in scope.",
-      "LEED documentation readiness: rainwater reuse systems contribute directly to LEED v4.1 Water Efficiency credits (WEp2, WEc1), relevant if Amazon pursues future certification.",
-      "Stormwater management compliance: Bexar County MS4 permit obligations create a regulatory co-benefit from roof capture, reducing peak-flow liability.",
-    ],
-    sbtiCommitted: true,
-    netZeroPledgeYr: 2040,
-    secFilingSnippet:
-      "Water availability risks may materially affect operations in water-stressed regions. We are actively evaluating on-site conservation and reuse measures across our distribution network.",
-  },
+  const esgBullets = [
+    `CV confidence score of ${cvPct}% reflects satellite-derived detection certainty for physical signals including roof geometry${brief.physical_suitability.cooling_tower_detected ? " and cooling tower activity" : ""}.`,
+    `CO₂ offset of ${(roi.co2_offset_lbs / 1000).toFixed(1)}K lbs/yr represents direct scope 3 emissions reduction via potable water demand avoidance.`,
+    `10-year NPV of ${fmtUsd(roi.npv_10yr_usd)} at a 5% discount rate demonstrates durable financial value well beyond the initial payback horizon.`,
+    ...(building.sbti_committed
+      ? ["Building operator is publicly committed to Science Based Targets initiative (SBTi), requiring measurable water stewardship progress at the facility level."]
+      : []),
+  ];
 
-  confidenceCaveats: {
-    cvConfidencePct: 81,
-    keyAssumptions: [
-      "Annual rainfall of 30.4\" per NOAA 30-year average for Bexar County — actual year-to-year variance ±15%.",
-      "Collection efficiency of 85% assumes clean roof surface and functional first-flush diverter — debris or membrane damage would reduce this.",
-      "Cooling tower blowdown substitution assumes 70% discharge fraction; actual ratio depends on system chemistry and current tower operating pressure.",
-      "Water rate of $4.20/kgal and sewer rate of $3.80/kgal per SAWS Q1 2026 schedule — subject to annual adjustment.",
-      "CapEx midpoint of $220K assumes standard packaged Grundfos CME configuration; structural roof load assessment may adjust this range.",
-      "All projections use base-case scenario multipliers. Conservative scenario reduces savings ~20%; upside scenario improves them ~12%.",
-    ],
-    nextValidationStep:
-      "Commission a physical site survey to confirm: (1) roof condition and drainage geometry, (2) cooling tower operational status and blowdown volume logs, (3) available mechanical room footprint for tank and pump installation. A half-day site visit can narrow CapEx range to ±10% and raise CV confidence effectively to 100%, unlocking a final investment brief with binding quote.",
-    disclaimer:
-      "This brief was generated by the RainUSE Nexus AI engine using satellite-derived building data and public utility rate schedules. All financial projections are estimates based on parameterized models and should not be relied upon as engineering or financial advice. A qualified Grundfos engineer should review all assumptions prior to commercial proposal.",
-  },
+  const nextStepOrder = (n: number) => building.incentive_value_usd > 0 ? String(n) : String(n - 1);
 
-  nextSteps: {
-    steps: [
-      {
-        order: "1",
-        action: "Schedule a physical site survey with the Amazon facilities lead",
-        owner: "Grundfos Account Executive",
-        horizon: "Week 1–2",
-      },
-      {
-        order: "2",
-        action: "Pull SAWS water billing history (12 months) to validate rate assumptions",
-        owner: "AE + Customer",
-        horizon: "Week 1",
-      },
-      {
-        order: "3",
-        action: "File Bexar County conservation incentive pre-application",
-        owner: "Grundfos Inside Sales",
-        horizon: "Week 2–3",
-      },
-      {
-        order: "4",
-        action: "Issue binding CapEx quote and updated investment brief based on survey findings",
-        owner: "Grundfos Engineering",
-        horizon: "Week 3–4",
-      },
-      {
-        order: "5",
-        action: "Present final brief to Amazon Sustainability Capital team",
-        owner: "AE + SE",
-        horizon: "Week 4–6",
-      },
-    ],
-    closingStatement:
-      "This opportunity is time-sensitive. Bexar County's conservation incentive program is currently funded and accepting applications — allocation is first-come, first-served and typically exhausts before Q3. Moving to site survey within 10 business days preserves first-mover position on both the incentive and the capital approval cycle.",
-  },
-};
+  return {
+    generatedAt: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    buildingRef: building.building_id.toUpperCase(),
+    analyst: "RainUSE Nexus AI Engine",
+
+    executiveSummary: brief.why_this_building_now,
+
+    opportunityOverview: {
+      headline: brief.recommended_sales_angle,
+      bullets: [
+        `${((brief.physical_suitability.roof_area_sqft ?? 0) / 1_000).toFixed(0)}K sqft roof yields approximately ${fmtGal(brief.physical_suitability.annual_capture_gal)} under base-case rainfall assumptions.`,
+        `Annual combined savings of ${fmtUsd(roi.total_annual_savings_usd)} deliver a ${roi.simple_payback_yrs.toFixed(1)}-year payback — after applying a ${fmtUsd(building.incentive_value_usd)} available incentive.`,
+        brief.physical_suitability.cooling_tower_detected
+          ? `Cooling tower activity detected at ${cvPct}% CV confidence via satellite — the highest-leverage water consumption signal for blowdown substitution.`
+          : `Roof surface geometry confirmed at ${cvPct}% CV confidence via satellite imagery — direct feed into rainwater reuse system.`,
+        roi.stormwater_fee_avoidance_usd > 0
+          ? `Stormwater fee avoidance of ${fmtUsd(roi.stormwater_fee_avoidance_usd)}/yr is captured independently of water/sewer savings, compressing payback further.`
+          : `Water + sewer combined savings of ${fmtUsd(roi.annual_water_savings_usd + roi.annual_sewer_savings_usd)}/yr form the core financial driver — fully independent of incentive eligibility.`,
+      ],
+      context: `${building.metro}, ${building.state} · ${building.building_type.replace(/_/g, " ")} · ${building.annual_rainfall_in}" annual rainfall (NOAA 30-yr avg). Base-case scenario uses standard collection efficiency and current utility rate schedules.`,
+    },
+
+    financialSnapshot: {
+      kpis,
+      confidenceAdjRoiPct: roi.confidence_adj_roi_pct,
+      cvConfidencePct: cvPct,
+      savingsBreakdown: [
+        { label: "Water savings",          usd: roi.annual_water_savings_usd },
+        { label: "Sewer savings",          usd: roi.annual_sewer_savings_usd },
+        { label: "Stormwater avoidance",   usd: roi.stormwater_fee_avoidance_usd },
+        ...(incentiveAmort > 0 ? [{ label: "Incentive amortization", usd: incentiveAmort }] : []),
+      ],
+      capexRangeLow:  capexLow,
+      capexRangeHigh: capexHigh,
+      incentiveUsd:   building.incentive_value_usd,
+    },
+
+    esgResilience: {
+      headline: brief.recommended_sales_angle.includes(".")
+        ? brief.recommended_sales_angle.split(".")[0] + "."
+        : brief.recommended_sales_angle,
+      bullets: esgBullets,
+      sbtiCommitted:    building.sbti_committed    ?? false,
+      netZeroPledgeYr:  building.net_zero_pledge_yr,
+      secFilingSnippet: building.sec_filing_snippet,
+    },
+
+    confidenceCaveats: {
+      cvConfidencePct:      cvPct,
+      keyAssumptions:       parseAssumptions(brief.confidence_caveats.key_assumptions),
+      nextValidationStep:   brief.confidence_caveats.next_validation_step,
+      disclaimer:
+        "This brief was generated by the RainUSE Nexus AI engine using satellite-derived building data and public utility rate schedules. All financial projections are estimates based on parameterized models and should not be relied upon as engineering or financial advice. A qualified engineer should review all assumptions prior to commercial proposal.",
+    },
+
+    nextSteps: {
+      steps: [
+        { order: "1", action: "Schedule a physical site survey to confirm roof condition, drainage geometry, and cooling tower operational status", owner: "Account Executive", horizon: "Week 1–2" },
+        { order: "2", action: "Pull 12-month utility billing history to validate water and sewer rate assumptions", owner: "AE + Customer", horizon: "Week 1" },
+        ...(building.incentive_value_usd > 0
+          ? [{ order: "3", action: "File incentive pre-application to reserve funding allocation — programs are first-come, first-served", owner: "Inside Sales", horizon: "Week 2–3" }]
+          : []),
+        { order: nextStepOrder(4), action: "Issue binding CapEx quote and updated brief based on site survey findings", owner: "Engineering", horizon: "Week 3–4" },
+        { order: nextStepOrder(5), action: "Present final brief to decision-maker with confirmed numbers and binding proposal", owner: "AE + SE", horizon: "Week 4–6" },
+      ],
+      closingStatement: `This ${building.building_type.replace(/_/g, " ")} in ${building.metro} represents a ${roi.simple_payback_yrs <= 3 ? "high-urgency" : "strong"} opportunity: ${fmtUsd(roi.total_annual_savings_usd)}/yr in combined savings at a ${roi.simple_payback_yrs.toFixed(1)}-year payback. Moving to site survey is the single highest-value next action to convert this analysis into a binding proposal.`,
+    },
+  };
+}
+
+// ─── Loading / error states ───────────────────────────────────────────────────
+
+function LeftPanelSkeleton() {
+  return (
+    <div className="flex flex-col h-full bg-gray-900 animate-pulse">
+      <div className="flex-1 bg-gray-800" />
+      <div className="border-t border-gray-800 px-5 py-4 space-y-4">
+        <div className="h-2 w-24 bg-gray-800 rounded" />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <div className="h-2 w-16 bg-gray-800 rounded" />
+              <div className="h-5 w-12 bg-gray-700 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LeftPanelError({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col h-full bg-gray-900 items-center justify-center p-6">
+      <svg className="w-8 h-8 text-rose-500 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" strokeLinecap="round" />
+      </svg>
+      <p className="text-xs text-rose-400 text-center leading-relaxed">{message}</p>
+    </div>
+  );
+}
+
+function BriefLoadingState() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8">
+      {/* Animated ring */}
+      <div className="relative w-16 h-16 mb-6">
+        <svg className="w-16 h-16 animate-spin" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="#1f2937" strokeWidth="4" />
+          <path d="M32 4 a28 28 0 0 1 28 28" stroke="#14b8a6" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+        </div>
+      </div>
+
+      <h2 className="text-sm font-bold text-slate-700 mb-1">Analyzing building data…</h2>
+      <p className="text-xs text-slate-400 text-center max-w-xs leading-relaxed mb-6">
+        The RainUSE Nexus AI engine is generating your investment brief.
+        This typically takes 10–20 seconds.
+      </p>
+
+      {/* Progress hints */}
+      <div className="space-y-2 w-full max-w-xs">
+        {[
+          "Retrieving satellite CV signals",
+          "Running ROI scenario analysis",
+          "Grounding with local water market data",
+          "Drafting investment brief sections",
+        ].map((step, i) => (
+          <div key={i} className="flex items-center gap-2.5">
+            <div
+              className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0 animate-pulse"
+              style={{ animationDelay: `${i * 400}ms` }}
+            />
+            <span className="text-[11px] text-slate-400">{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RightPanelError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const isThrottled =
+    message.toLowerCase().includes("unavailable") ||
+    message.toLowerCase().includes("503") ||
+    message.toLowerCase().includes("high demand");
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-full py-24 px-8">
+      <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 max-w-md w-full">
+        <div className="flex items-start gap-3 mb-4">
+          <svg className="w-5 h-5 text-rose-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" strokeLinecap="round" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-rose-800 mb-1">
+              {isThrottled ? "AI model temporarily busy" : "Unable to generate brief"}
+            </p>
+            <p className="text-xs text-rose-600 leading-relaxed">
+              {isThrottled
+                ? "The Gemini AI model is experiencing high demand right now. This is temporary — click \"Try again\" in a few seconds."
+                : message}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onRetry}
+          className="w-full py-2 rounded-lg bg-rose-100 hover:bg-rose-200 border border-rose-300 text-sm font-semibold text-rose-700 transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function BriefPage({
+export default function BriefPage({
   params,
 }: {
   params: Promise<{ buildingId: string }>;
 }) {
-  const { buildingId } = await params;
+  const { buildingId } = use(params);
 
-  // Fallback to the stub building if the id is not in mock set
-  const building = MOCK_BUILDINGS[buildingId] ?? MOCK_BUILDINGS["bld_stub_001"];
+  const [building, setBuilding]         = useState<BuildingInfo | null>(null);
+  const [roi, setRoi]                   = useState<ROIResponse | null>(null);
+  const [brief, setBrief]               = useState<BriefAPIResponse | null>(null);
+  const [buildingError, setBuildingError] = useState<string | null>(null);
+  const [briefError, setBriefError]     = useState<string | null>(null);
+  const [retryKey, setRetryKey]         = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Reset state on each fetch cycle
+    setBuilding(null);
+    setRoi(null);
+    setBrief(null);
+    setBuildingError(null);
+    setBriefError(null);
+
+    // Fast path: building metadata + ROI numbers (~200ms each)
+    Promise.all([fetchBuilding(buildingId), fetchROI(buildingId, "base")])
+      .then(([bld, r]) => {
+        if (!cancelled) { setBuilding(bld); setRoi(r); }
+      })
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setBuildingError(e instanceof Error ? e.message : "Failed to load building data");
+      });
+
+    // Slow path: AI brief generation (10–20s)
+    fetchBrief(buildingId)
+      .then((b) => { if (!cancelled) setBrief(b); })
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setBriefError(e instanceof Error ? e.message : "Failed to generate investment brief");
+      });
+
+    return () => { cancelled = true; };
+  }, [buildingId, retryKey]);
+
+  // Derive display data
+  const reportData = brief && roi && building ? toReportData(brief, building, roi) : null;
+
+  // Header renders immediately with a fallback until building loads
+  const headerBuilding = building ?? {
+    address: buildingId,
+    metro: "—", state: "—", building_type: "—",
+    viability_score: 0,
+    recommended_angle: "cost_savings" as const,
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 overflow-hidden">
 
-      {/* ── Full-width header ──────────────────────────────── */}
+      {/* ── Header — renders immediately ──────────────────────────── */}
       <BriefHeader
-        address={building.address}
-        metro={building.metro}
-        state={building.state}
-        buildingType={building.buildingType}
-        ownerTenant={building.ownerTenant}
-        viabilityScore={building.viabilityScore}
-        recommendedAngle={building.recommendedAngle}
-        generatedAt={MOCK_BRIEF.generatedAt}
-        buildingId={MOCK_BRIEF.buildingRef}
+        address={headerBuilding.address}
+        metro={headerBuilding.metro}
+        state={headerBuilding.state}
+        buildingType={headerBuilding.building_type}
+        ownerTenant={"owner_tenant" in headerBuilding ? (headerBuilding as BuildingInfo).owner_tenant : undefined}
+        viabilityScore={headerBuilding.viability_score}
+        recommendedAngle={headerBuilding.recommended_angle}
+        generatedAt={reportData?.generatedAt ?? "—"}
+        buildingId={reportData?.buildingRef ?? buildingId.toUpperCase()}
       />
 
-      {/* ── Two-column body ───────────────────────────────── */}
+      {/* ── Two-column body ───────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
 
-        {/* Left — satellite/evidence panel */}
+        {/* Left — satellite / evidence panel */}
         <div className="w-[380px] xl:w-[420px] shrink-0 flex flex-col border-r border-gray-800 overflow-hidden">
-          <SatellitePanel
-            address={building.address}
-            lat={building.lat}
-            lng={building.lng}
-            roofAreaSqft={building.roofAreaSqft}
-            coolingTowerCount={building.coolingTowerCount}
-            cvConfidencePct={building.cvConfidencePct}
-            urgencyScore={building.urgencyScore}
-            imageryDate={building.imageryDate}
-            imagerySource={building.imagerySource}
-            imageryUrl={building.imageryUrl}
-          />
+          {buildingError ? (
+            <LeftPanelError message={buildingError} />
+          ) : building ? (
+            <SatellitePanel
+              address={building.address}
+              lat={building.lat}
+              lng={building.lng}
+              roofAreaSqft={building.roof_area_sqft ?? brief?.physical_suitability.roof_area_sqft ?? 0}
+              coolingTowerCount={building.cooling_tower_count ?? 0}
+              cvConfidencePct={Math.round(building.cv_confidence_score * 100)}
+              urgencyScore={building.urgency_score ?? 7}
+              imageryDate={building.imagery_date}
+              imagerySource={building.imagery_source}
+              imageryUrl={building.imagery_url}
+            />
+          ) : (
+            <LeftPanelSkeleton />
+          )}
         </div>
 
         {/* Right — report document */}
         <div className="flex-1 overflow-y-auto bg-slate-100">
-          {/* Subtle document shadow / paper effect */}
-          <div className="max-w-3xl mx-auto my-6 shadow-2xl rounded-xl overflow-hidden ring-1 ring-slate-200">
-            <BriefReport data={MOCK_BRIEF} />
-          </div>
+          {briefError ? (
+            <RightPanelError
+              message={briefError}
+              onRetry={() => { setBriefError(null); setRetryKey((k) => k + 1); }}
+            />
+          ) : reportData ? (
+            <div className="max-w-3xl mx-auto my-6 shadow-2xl rounded-xl overflow-hidden ring-1 ring-slate-200">
+              <BriefReport data={reportData} />
+            </div>
+          ) : (
+            <BriefLoadingState />
+          )}
         </div>
       </div>
     </div>

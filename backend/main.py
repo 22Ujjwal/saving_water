@@ -1,6 +1,7 @@
 # main.py
 import json
 import logging
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -18,20 +19,31 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="RainUSE Nexus API")
 
+# CORS_ORIGINS env var overrides the default (comma-separated for multiple origins)
+_cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Load once at startup — never mutate
-# Use stub file during development; drop real buildings.json from Person 1 to switch
+# Drop real buildings.json into data/ to override the stub automatically
 _data_file = Path("data/buildings.json") if Path("data/buildings.json").exists() else Path("data/buildings_stub.json")
+logger.info("Loading buildings from %s", _data_file.resolve())
 _raw = json.loads(_data_file.read_text())
-BUILDINGS: dict[str, BuildingRecord] = {
-    b["building_id"]: BuildingRecord(**b) for b in _raw
-}
+
+BUILDINGS: dict[str, BuildingRecord] = {}
+_skipped = 0
+for _b in _raw:
+    try:
+        BUILDINGS[_b["building_id"]] = BuildingRecord(**_b)
+    except Exception as _e:
+        _skipped += 1
+        logger.warning("Skipped building %s — validation error: %s", _b.get("building_id", "?"), _e)
+
+logger.info("Loaded %d buildings (%d skipped)", len(BUILDINGS), _skipped)
 
 
 def get_building(building_id: str) -> BuildingRecord:
@@ -70,5 +82,9 @@ def generate_investment_brief(req: BriefRequest):
         logger.error("BriefResponse validation failed for %s: %s", req.building_id, str(e))
         raise HTTPException(status_code=422, detail=f"Brief schema validation failed: {str(e)}")
     except Exception as e:
-        logger.error("Brief generation failed for %s: %s", req.building_id, str(e))
-        raise HTTPException(status_code=500, detail=f"Brief generation failed: {str(e)}")
+        err_str = str(e)
+        logger.error("Brief generation failed for %s: %s", req.building_id, err_str)
+        # Propagate Gemini 503 as a 503 so the frontend can show a targeted message
+        if "503" in err_str or "UNAVAILABLE" in err_str:
+            raise HTTPException(status_code=503, detail="AI model temporarily unavailable — high demand. Please retry in a moment.")
+        raise HTTPException(status_code=500, detail=f"Brief generation failed: {err_str}")

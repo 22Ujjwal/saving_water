@@ -2,8 +2,8 @@ import React from "react";
 
 interface SatellitePanelProps {
   address: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   roofAreaSqft: number;
   coolingTowerCount: number;
   cvConfidencePct: number;
@@ -103,9 +103,9 @@ export default function SatellitePanel({
               <line x1="40" y1="213" x2="40" y2="223" stroke="#6b7280" strokeWidth="1" />
               <line x1="140" y1="213" x2="140" y2="223" stroke="#6b7280" strokeWidth="1" />
               <text x="65" y="230" fill="#6b7280" fontSize="7" fontFamily="monospace">~200 ft</text>
-              {/* Corner coordinates */}
-              <text x="36" y="55" fill="#374151" fontSize="7" fontFamily="monospace">{lat.toFixed(4)}°N</text>
-              <text x="36" y="215" fill="#374151" fontSize="7" fontFamily="monospace">{lng.toFixed(4)}°W</text>
+              {/* Corner coordinates — only when available */}
+              {lat !== undefined && <text x="36" y="55" fill="#374151" fontSize="7" fontFamily="monospace">{lat.toFixed(4)}°N</text>}
+              {lng !== undefined && <text x="36" y="215" fill="#374151" fontSize="7" fontFamily="monospace">{lng.toFixed(4)}°W</text>}
             </svg>
 
             {/* Status badge */}
