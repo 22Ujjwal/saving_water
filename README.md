@@ -206,7 +206,7 @@ saving_water/
 │   │   ├── s04_rainfall_join.py
 │   │   ├── s05_overture_enrich.py
 │   │   ├── s06_score.py                ← scoring → buildings.json + state_scores.json
-│   │   └── s07_cv_layer.py             ← optional CLIP visual confidence
+│   │   └── s07_cv_layer.py             ← OpenAI CLIP visual confidence
 │   ├── data/
 │   │   ├── raw/                        ← input GeoJSON per state
 │   │   └── processed/                  ← intermediate .gpkg files
@@ -241,7 +241,7 @@ saving_water/
 
 ## Key Design Decisions
 
-**No custom CV model for roof area** — Microsoft's dataset provides ML-derived building polygons for all 50 states. Roof area comes directly from polygon geometry — zero inference cost, near-perfect coverage.
+**Roof area** — Microsoft's dataset provides ML-derived building polygons for all 50 states. Roof area comes directly from polygon geometry — zero inference cost, near-perfect coverage.
 
 **EPA FRS over satellite for cooling tower detection** — NAICS codes reliably flag cooling tower presence for power plants, refineries, hospitals, data centers, and hotels via a spatial join. Faster, cheaper, and no false positives from puddles or HVAC units.
 
