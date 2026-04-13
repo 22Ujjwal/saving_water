@@ -11,11 +11,11 @@
  * do NOT invent or duplicate scoring logic.
  *
  * Color palette (water-themed, no green):
- *   80–100  #1E3A8A  Prime     (deep navy)
- *   60–80   #2563EB  Strong    (bold blue)
- *   40–60   #38B2AC  Moderate  (teal)
- *   20–40   #93C5FD  Emerging  (sky blue)
- *   0–20    #DBEAFE  Low       (pale blue)
+ *   75–100  #1E3A8A  Prime     (deep navy)
+ *   60–75   #2563EB  Strong    (bold blue)
+ *   48–60   #38B2AC  Moderate  (teal)
+ *   38–48   #93C5FD  Emerging  (sky blue)
+ *   0–38    #DBEAFE  Low       (pale blue)
  *   No data #E5E7EB           (neutral gray)
  */
 
@@ -24,10 +24,10 @@ import type { StateScore } from "@/types/state";
 // ── Color scale ────────────────────────────────────────────────────────────────
 
 const COLOR_SCALE = [
-  { min: 80, color: "#1E3A8A" },
+  { min: 75, color: "#1E3A8A" },
   { min: 60, color: "#2563EB" },
-  { min: 40, color: "#38B2AC" },
-  { min: 20, color: "#93C5FD" },
+  { min: 48, color: "#38B2AC" },
+  { min: 38, color: "#93C5FD" },
   { min: 0,  color: "#DBEAFE" },
 ] as const;
 
@@ -58,10 +58,10 @@ export function getOpportunityTier(score: number | null | undefined): Opportunit
   if (score == null || isNaN(score)) {
     return { label: "No Data",   textClass: "text-gray-400",  borderClass: "border-gray-600/40" };
   }
-  if (score >= 80) return { label: "Prime",    textClass: "text-blue-200",  borderClass: "border-blue-700/60" };
+  if (score >= 75) return { label: "Prime",    textClass: "text-blue-200",  borderClass: "border-blue-700/60" };
   if (score >= 60) return { label: "Strong",   textClass: "text-blue-400",  borderClass: "border-blue-500/50" };
-  if (score >= 40) return { label: "Moderate", textClass: "text-teal-300",  borderClass: "border-teal-500/50" };
-  if (score >= 20) return { label: "Emerging", textClass: "text-sky-400",   borderClass: "border-sky-500/50"  };
+  if (score >= 48) return { label: "Moderate", textClass: "text-teal-300",  borderClass: "border-teal-500/50" };
+  if (score >= 38) return { label: "Emerging", textClass: "text-sky-400",   borderClass: "border-sky-500/50"  };
   return               { label: "Low",       textClass: "text-slate-400", borderClass: "border-slate-600/40" };
 }
 
@@ -110,23 +110,23 @@ export function aggregateStateMetrics(s: StateScore): StateMetrics {
  * capture market opportunity dimensions. All sub-scores are pipeline-computed
  * values from state_scores.json — no invented data.
  *
- * Weights:
- *   water_cost_pressure  25%  — financial incentive to harvest
- *   commercial_density   25%  — addressable market size
- *   rainfall_capture     20%  — physical feasibility
- *   regulatory_pressure  20%  — policy / incentive tailwind
- *   esg_alignment        10%  — ESG demand signal
+ * Weights (only the sub-scores that actually vary across states):
+ *   water_cost_pressure  38%  — financial incentive to harvest
+ *   rainfall_capture     31%  — physical feasibility
+ *   regulatory_pressure  31%  — policy / incentive tailwind
  *   density_bonus        +10  — bonus for large candidate pools
+ *
+ * commercial_density and esg_alignment are excluded because the pipeline
+ * assigns them the same constant value (100 and 50) for all states —
+ * including them would compress the score range and produce a flat map.
  *
  * Falls back to market_readiness_score if score_breakdown is absent.
  */
 
 const OPPORTUNITY_WEIGHTS: Record<string, number> = {
-  water_cost_pressure: 0.25,
-  commercial_density:  0.25,
-  rainfall_capture:    0.20,
-  regulatory_pressure: 0.20,
-  esg_alignment:       0.10,
+  water_cost_pressure: 0.38,
+  rainfall_capture:    0.31,
+  regulatory_pressure: 0.31,
 };
 
 // Approximate maximum candidate count across the dataset (TX ~11,400)
@@ -159,10 +159,10 @@ export function scoreStateOpportunity(s: StateScore): number {
 // ── Legend items (for map overlay) ────────────────────────────────────────────
 
 export const LEGEND_ITEMS = [
-  { color: "#1E3A8A", label: "Prime",    range: "80–100" },
-  { color: "#2563EB", label: "Strong",   range: "60–80"  },
-  { color: "#38B2AC", label: "Moderate", range: "40–60"  },
-  { color: "#93C5FD", label: "Emerging", range: "20–40"  },
-  { color: "#DBEAFE", label: "Low",      range: "0–20"   },
+  { color: "#1E3A8A", label: "Prime",    range: "75–100" },
+  { color: "#2563EB", label: "Strong",   range: "60–75"  },
+  { color: "#38B2AC", label: "Moderate", range: "48–60"  },
+  { color: "#93C5FD", label: "Emerging", range: "38–48"  },
+  { color: "#DBEAFE", label: "Low",      range: "0–38"   },
   { color: "#E5E7EB", label: "No Data",  range: "—"      },
 ] as const;

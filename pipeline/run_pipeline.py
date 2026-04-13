@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Run the full RainUse Nexus data pipeline end-to-end.
 
