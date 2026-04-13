@@ -77,7 +77,7 @@ Composite of drought risk index, water rate pressure, stormwater fee activity, a
 
 ### State Opportunity Score (0–100, choropleth)
 
-![pluvial_map](saving_water/readme_assets/pulvial1.png)
+![pluvial_map](readme_assets/pulvial1.png)
 
 Weighted from pipeline sub-scores that actually vary by state:
 
@@ -90,7 +90,7 @@ Weighted from pipeline sub-scores that actually vary by state:
 
 Tiers: **Prime** (75+) · **Strong** (60–75) · **Moderate** (48–60) · **Emerging** (38–48) · **Low** (<38)
 
-![pluvial_zoom16](saving_water/readme_assets/pulvial2.png)
+![pluvial_zoom16](readme_assets/pulvial2.png)
 
 ---
 
@@ -110,7 +110,7 @@ Tiers: **Prime** (75+) · **Strong** (60–75) · **Moderate** (48–60) · **Em
 ---
 
 ## ROI Model
-![pluvial_roi](saving_water/readme_assets/pulvial3.png)
+![pluvial_roi](readme_assets/pulvial3.png)
 
 ```
 harvestable_gal = roof_area_sqft × rainfall_in × 0.623 × efficiency
@@ -128,7 +128,7 @@ Three scenarios (conservative / base / upside) adjust rainfall, efficiency, and 
 ---
 
 ## AI Brief Generation
-![pluvial_AI_brief](saving_water/readme_assets/pulvial4.png)
+![pluvial_AI_brief](readme_assets/pulvial4.png)
 
 Each building can generate a structured sales brief via Google Gemini:
 
