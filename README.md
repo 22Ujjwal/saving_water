@@ -20,6 +20,8 @@ Finding the right buildings for water-reuse systems is a manual, expensive prosp
 5. **Enriches addresses** — street address and building type via Overture Maps
 6. **Scores every building** — multi-dimensional viability and urgency scoring
 7. **Surfaces opportunities** — interactive national choropleth + building-level drill-down with AI sales briefs
+8. **Calculates financial ROI** — three-scenario engine (conservative / base / upside) with CV-confidence-adjusted returns
+9. **Delivers pitch-ready briefs** — Gemini RAG brief rendered as a structured 7-section investment deliverable, emailable as a PDF
 
 **Output:** 11,577 pre-scored candidate buildings across 37 states, ready for sales prospecting.
 
@@ -45,10 +47,15 @@ s07  CV layer (optional)           → CLIP confidence scores per building
 
 ### Backend (FastAPI / Python)
 
-- Loads `buildings.json` once at startup into memory
-- `/buildings` — paginated building list with dynamic Google Maps satellite URLs injected
-- `/roi` — ROI calculation engine (conservative / base / upside scenarios)
-- `/brief` — AI-generated investment brief via Gemini, with template fallback + disk cache
+Loads `buildings.json` once at startup into memory. All endpoints are sub-millisecond reads except `/brief` and `/email-brief`.
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /buildings` | Full building list with satellite imagery URLs injected per building |
+| `GET /buildings/{id}` | Single building lookup by ID |
+| `POST /roi` | Three-scenario ROI engine (conservative / base / upside) — harvestable gallons, CAPEX, NPV, payback, CV-confidence-adjusted ROI |
+| `POST /brief` | Gemini RAG brief — structured 7-section investment deliverable, template fallback + disk cache |
+| `POST /email-brief` | Renders brief as PDF via WeasyPrint, delivers to recipient via Resend |
 
 ### Frontend (Next.js / MapLibre GL)
 
