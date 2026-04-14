@@ -209,10 +209,12 @@
     background: white !important;
   }
 
-  /* Force background colors and images to print */
+  /* Force background colors and images to print; disable motion */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    animation: none !important;
+    transition: none !important;
   }
 
   /* Hide elements that shouldn't be in the PDF */
@@ -220,9 +222,9 @@
     display: none !important;
   }
 
-  /* Show print-only elements */
+  /* Show print-only elements (use flex to preserve justify-between layout) */
   .print-only {
-    display: block !important;
+    display: flex !important;
   }
 
   /* Fix the page container — undo h-screen overflow-hidden */

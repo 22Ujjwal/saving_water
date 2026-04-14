@@ -59,6 +59,23 @@ export async function loadStateScores() {
   return res.json();
 }
 
+export async function sendBriefByEmail(
+  buildingId: string,
+  email: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/email-brief`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ building_id: buildingId, email }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      (detail as { detail?: string }).detail ?? `Email failed (${res.status})`
+    );
+  }
+}
+
 export async function loadStatesGeoJSON() {
   // The choropleth uses 'feature.properties.postal' mapping to 'state_code' in state_scores.json
   const res = await fetch("/data/states.optimized.geojson");

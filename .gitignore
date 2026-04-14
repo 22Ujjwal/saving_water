@@ -1,5 +1,8 @@
 # ── Secrets & AI files ────────────────────────────────────────────────────────
 .env
+.env.*
+backend/.env
+backend/.env.*
 .claude/
 CLAUDE.md
 context.md

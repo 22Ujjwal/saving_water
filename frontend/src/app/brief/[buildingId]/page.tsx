@@ -5,6 +5,7 @@ import BriefHeader from "@/components/brief/BriefHeader";
 import SatellitePanel from "@/components/brief/SatellitePanel";
 import BriefReport, { type BriefReportData, type FinancialKpi } from "@/components/brief/BriefReport";
 import { fetchBuilding, fetchROI, fetchBrief } from "@/lib/api";
+import { exportBriefPdf } from "@/lib/exportBrief";
 import type { BuildingInfo, ROIResponse, BriefAPIResponse } from "@/types/roi";
 
 // ─── Adapter: map backend response → BriefReportData ─────────────────────────
@@ -295,6 +296,17 @@ export default function BriefPage({
 
   const reportData = brief && roi && building ? toReportData(brief, building, roi) : null;
 
+  const handleExport = reportData && building
+    ? () => exportBriefPdf(reportData, {
+        address:           building.address,
+        metro:             building.metro,
+        state:             building.state,
+        buildingType:      building.building_type,
+        viabilityScore:    building.viability_score,
+        recommendedAngle:  building.recommended_angle,
+      })
+    : undefined;
+
   const headerBuilding = building ?? {
     address: buildingId,
     metro: "—", state: "—", building_type: "—",
@@ -316,6 +328,7 @@ export default function BriefPage({
         recommendedAngle={headerBuilding.recommended_angle}
         generatedAt={reportData?.generatedAt ?? "—"}
         buildingId={reportData?.buildingRef ?? buildingId.toUpperCase()}
+        onExport={handleExport}
       />
 
       {/* ── Two-column body ───────────────────────────────────────── */}
