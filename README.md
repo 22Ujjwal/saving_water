@@ -1,5 +1,5 @@
 # Pluvial - Overall Winner 🏆
-### Automated Water-Reuse Prospecting Engine - HackSMU 2025
+### Automated Water-Reuse Prospecting Engine - HackSMU 2026
 
 Built for **Grundfos**. Identifies commercial and industrial buildings across the continental US that are strong candidates for rainwater harvesting systems, ranked by opportunity score and visualized on an interactive national map.
 
