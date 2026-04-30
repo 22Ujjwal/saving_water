@@ -202,6 +202,12 @@ export default function Home() {
               {label}
             </Link>
           ))}
+          <Link
+            href="/presentation"
+            className="hover:text-[#0C7FB0] transition-colors duration-200 text-[#0F5F78]"
+          >
+            Presentation
+          </Link>
         </nav>
 
         {/* CTA */}
